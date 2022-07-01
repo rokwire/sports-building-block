@@ -19,6 +19,7 @@ XML_FEED_FTP_USER | < value > | yes | The user for the ftp server of the xml fee
 XML_FEED_FTP_PASSWORD | < value > | yes | The user's password for the ftp server of the xml feed
 SS_INTERNAL_API_KEY | < value > | yes | The API-KEY for internal communication with the Notifications BB
 SS_HOST | < value > | yes | The host which the service is deployed on
+SS_CORE_BB_URL | < value > | yes | The base URL for the Core BB
 
 #### Run locally without Docker
 

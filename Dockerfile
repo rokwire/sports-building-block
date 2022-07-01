@@ -17,4 +17,7 @@ COPY --from=builder /sp-app/bin/sport /
 
 COPY --from=builder /sp-app/driven/storage/sport-definitions.json /driven/storage/sport-definitions.json
 
+COPY --from=builder /sp-app/driver/web/authorization_policy.csv /driver/web/authorization_policy.csv
+COPY --from=builder /sp-app/vendor/github.com/rokwire/core-auth-library-go/v2/authorization/authorization_model_string.conf /sp-app/vendor/github.com/rokwire/core-auth-library-go/v2/authorization/authorization_model_string.conf
+
 ENTRYPOINT ["/sport"]
