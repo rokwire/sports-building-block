@@ -21,7 +21,7 @@ XML_FEED_FTP_HOST | < url > | yes | The FTP server's host for the XML feed
 XML_FEED_FTP_USER | < string > | yes | The user for the FRP server of the XML feed
 XML_FEED_FTP_PASSWORD | < string > | yes | The user's password for the FTP server of the XML feed
 SS_INTERNAL_API_KEY | < string > | yes | The API-KEY for internal communication with the Notifications BB
-SS_HOST | < url > | yes | URL where this application is being hosted
+SS_HOST | < url > | yes | Host for the Rokwire services
 
 #### Run locally without Docker
 
@@ -138,3 +138,4 @@ This repository is configured with a [pre-commit](https://pre-commit.com/) hook 
 $ git pull  # Pull in pre-commit configuration & baseline 
 $ pip install pre-commit 
 $ pre-commit install
+```
