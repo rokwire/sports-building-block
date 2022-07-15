@@ -1,6 +1,9 @@
-# Sports Service
+# Sports Building Block
 
-Go project to provide rest service for rokwire sports building block.
+The Sports Building Block manages sports data for the Rokwire platform.
+
+## Documentation
+The functionality provided by this application is documented in the [Wiki](https://github.com/rokwire/sports-building-block/wiki).
 
 ## Set Up
 
@@ -12,13 +15,13 @@ Go v1.16+
 
 The following Environment variables are supported. The service will not start unless those marked as Required are supplied.
 
-Name|Value|Required|Description
+Name|Format|Required|Description
 ---|---|---|---
-XML_FEED_FTP_HOST | < value > | yes | The ftp server's host of the xml feed
-XML_FEED_FTP_USER | < value > | yes | The user for the ftp server of the xml feed
-XML_FEED_FTP_PASSWORD | < value > | yes | The user's password for the ftp server of the xml feed
-SS_INTERNAL_API_KEY | < value > | yes | The API-KEY for internal communication with the Notifications BB
-SS_HOST | < value > | yes | The host which the service is deployed on
+XML_FEED_FTP_HOST | < url > | yes | The FTP server's host for the XML feed
+XML_FEED_FTP_USER | < string > | yes | The user for the FRP server of the XML feed
+XML_FEED_FTP_PASSWORD | < string > | yes | The user's password for the FTP server of the XML feed
+SS_INTERNAL_API_KEY | < string > | yes | The API-KEY for internal communication with the Notifications BB
+SS_HOST | < url > | yes | Host for the Rokwire services
 
 #### Run locally without Docker
 
@@ -95,7 +98,20 @@ make fixfmt
 make clean
 ```
 
-## Sports API End Points
+### Test Application APIs
+
+Verify the service is running as calling the get version API.
+
+#### Call get version API
+
+curl -X GET -i https://api-dev.rokwire.illinois.edu/sports-service/version
+
+Response
+```
+2.0.0
+```
+
+## Sports API Endpoints
 
 Name|Deprecated|Description
 ---|---|---
@@ -110,3 +126,16 @@ Name|Deprecated|Description
 /sports-service/api/v2/team-schedule | no | get team schedule
 /sports-service/api/v2/team-record | no | get team record
 /sports-service/api/v2/live-games | no | get current live games
+
+## Contributing
+If you would like to contribute to this project, please be sure to read the [Contributing Guidelines](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md), and [Conventions](CONVENTIONS.md) before beginning.
+
+### Secret Detection
+This repository is configured with a [pre-commit](https://pre-commit.com/) hook that runs [Yelp's Detect Secrets](https://github.com/Yelp/detect-secrets). If you intend to contribute directly to this repository, you must install pre-commit on your local machine to ensure that no secrets are pushed accidentally.
+
+```
+# Install software 
+$ git pull  # Pull in pre-commit configuration & baseline 
+$ pip install pre-commit 
+$ pre-commit install
+```

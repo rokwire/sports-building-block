@@ -27,7 +27,7 @@ M = $(shell printf "\033[34;1m▶\033[0m")
 SHELL=bash
 
 .PHONY: all
-all: vendor log-variables checkfmt lint | $(BASE) ; $(info $(M) building executable(s)… $(VERSION) $(DATE)) @ ## Build program binary
+all: vendor log-variables checkfmt lint test-short | $(BASE) ; $(info $(M) building executable(s)… $(VERSION) $(DATE)) @ ## Build program binary
 	$Q cd $(CURDIR) && $(GO) generate ./...
 	@ret=0 && for d in $(BUILDS); do \
 		if expr \"$$d\" : \"${MODULE}\" 1>/dev/null; then SRCPATH=$(CURDIR) ; else SRCPATH=$(CURDIR)/$${d/${MODULE}\//} ; fi ;  \
@@ -130,5 +130,3 @@ log-variables: ; $(info $(M) Log info…) @ ## Log the variables values
 	@echo "CODE_OFFSET:"$(CODE_OFFSET)
 	@echo "BUILD_NUMBER:"$(BUILD_NUMBER)
 	@echo "VERSION:"$(VERSION)
-
-
