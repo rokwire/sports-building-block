@@ -2,28 +2,16 @@
 
 ## Supported Versions
 
-Patches for [ **sports-service** ] will only be applied to the following versions:
+Patches for **Sports Building Block** in this repository will only be applied to the following versions:
 
 | Version | Supported |
 | ------- | ------------------ |
-| 1.0.258 | :white_check_mark: |
-| 1.0.256 | :white_check_mark: |
-| 1.0.254 | :x: |
-| 1.0.252 | :x: |
-| 1.0.250 | :x: |
-| 1.0.247 | :x: |
-| 1.0.245 | :x: |
-| 1.0.243 | :x: |
-| 1.0.240 | :x: |
-| 1.0.237 | :x: |
-| 1.0.235 | :x: |
-| 1.0.232 | :x: |
-| 1.0.229 | :x: |
-| 1.0.227 | :x: |
-| < 1.0.227 | :x: |
+| 2.0.1 | :white_check_mark: |
+| < 2.0.1 | :x: |
 
 ## Reporting a Bug or Vulnerability
 
-Vulnerabilities can be responsibly disclosed to [securitysupport@illinois.edu](mailto:securitysupport@illinois.edu).
+Vulnerabilities can be responsibly disclosed through the process
+ documented at https://go.illinois.edu/vulnerability
 
-Bugs can be reported in a GIT repository via GIT issues.
+Bugs can be reported by creating a [GitHub issue](https://github.com/rokwire/sports-building-block/issues/new?assignees=&labels=bug&template=bug_report.md&title=%5BBUG%5D+).
