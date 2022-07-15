@@ -331,18 +331,8 @@ func (a *ApisHandler) GetLiveGames(w http.ResponseWriter, r *http.Request) {
 	successfulResponse(w, []byte(result))
 }
 
-// Config processes two actions - GetConfig and UpdateConfig
-func (a *ApisHandler) Config(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		a.getConfig(w, r)
-	} else if r.Method == http.MethodPut {
-		a.updateConfig(w, r)
-	} else {
-		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-	}
-}
-
-func (a *ApisHandler) getConfig(w http.ResponseWriter, r *http.Request) {
+//GetConfig retrieves the configs
+func (a *ApisHandler) GetConfig(w http.ResponseWriter, r *http.Request) {
 	config, err := a.app.GetConfig()
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to retrieve config. Reason: %s", err.Error())
@@ -362,7 +352,8 @@ func (a *ApisHandler) getConfig(w http.ResponseWriter, r *http.Request) {
 	successfulResponse(w, []byte(result))
 }
 
-func (a *ApisHandler) updateConfig(w http.ResponseWriter, r *http.Request) {
+//UpdateConfig updates the configs
+func (a *ApisHandler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
 	cfgBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		errMsg := "failed to read request body"

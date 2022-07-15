@@ -22,6 +22,7 @@ XML_FEED_FTP_USER | < string > | yes | The user for the FRP server of the XML fe
 XML_FEED_FTP_PASSWORD | < string > | yes | The user's password for the FTP server of the XML feed
 SS_INTERNAL_API_KEY | < string > | yes | The API-KEY for internal communication with the Notifications BB
 SS_HOST | < url > | yes | Host for the Rokwire services
+SS_CORE_BB_URL | < url > | yes | The base URL for the Core BB
 
 #### Run locally without Docker
 

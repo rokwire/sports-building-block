@@ -1,0 +1,4 @@
+p, all_admin_sports, /sports-service/*, (GET)|(POST)|(PUT)|(DELETE), Access all Core BB admin endpoints
+p, all_sports-configs, /sports-service/api/v2/config, (GET)|(POST)|(PUT)|(DELETE), All sports configs actions
+p, get_sports-configs, /sports-service/api/v2/config, (GET), Get sports configs
+p, update_sports-configs, /sports-service/api/v2/config, (GET)|(PUT), Update sports configs

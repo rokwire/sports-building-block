@@ -42,12 +42,13 @@ func main() {
 
 	// host
 	ssHost := getEnvKey("SS_HOST")
+	coreURL := getEnvKey("SS_CORE_BB_URL")
 
 	port := "80"
 
 	///////////////////////////////////
 	// web adapter
-	webAdapter := web.NewWebAdapter(Version, port, ssInternalAPIKey, ssHost, ftpHost, ftpUser, ftpPassword)
+	webAdapter := web.NewWebAdapter(Version, port, ssInternalAPIKey, ssHost, coreURL, ftpHost, ftpUser, ftpPassword)
 	webAdapter.Start()
 	///////////////////////////////////
 }
