@@ -23,6 +23,17 @@ type Storage interface {
 	GetSports()
 }
 
+// NotificationsBB interface for the Notifications building block communication
+type NotificationsBB interface {
+	SendNotifications(recipients []Recipient, text string, body string, data map[string]string) error
+}
+
+// Recipient entity
+type Recipient struct {
+	UserID string `json:"user_id"`
+	Name   string `json:"name"`
+}
+
 // Provider interface has to be implemented by all sports providers
 type Provider interface {
 	GetNews(id *string, sport []string, limit int) ([]model.News, error)

@@ -28,11 +28,13 @@ import (
 type Notifications struct {
 	apiKey string
 	host   string
+	appID  string
+	orgID  string
 }
 
 // New creates new instance
-func New(apiKey string, host string) Notifications {
-	return Notifications{apiKey: apiKey, host: host}
+func New(apiKey string, host string, appID string, orgID string) Notifications {
+	return Notifications{apiKey: apiKey, host: host, appID: appID, orgID: orgID}
 }
 
 // SendDataMsg sends data message
@@ -69,6 +71,8 @@ func (n *Notifications) SendNotificationMsg(topic string, title string, body str
 	bodyJSON["subject"] = title
 	bodyJSON["body"] = body
 	bodyJSON["data"] = data
+	bodyJSON["app_id"] = n.appID
+	bodyJSON["org_id"] = n.orgID
 
 	bodyByteArr, err := json.Marshal(bodyJSON)
 	if err != nil {
