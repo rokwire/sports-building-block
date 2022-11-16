@@ -47,8 +47,11 @@ func main() {
 	port := "80"
 
 	///////////////////////////////////
+	appID := getEnvKey("SPORTS_APP_ID")
+	orgID := getEnvKey("SPORTS_ORG_ID")
+
 	// web adapter
-	webAdapter := web.NewWebAdapter(Version, port, ssInternalAPIKey, ssHost, coreURL, ftpHost, ftpUser, ftpPassword)
+	webAdapter := web.NewWebAdapter(Version, port, appID, orgID, ssInternalAPIKey, ssHost, coreURL, ftpHost, ftpUser, ftpPassword)
 	webAdapter.Start()
 	///////////////////////////////////
 }

@@ -123,8 +123,8 @@ func logRequest(req *http.Request) {
 }
 
 // NewWebAdapter creates new instance
-func NewWebAdapter(version string, port string, internalAPIKey string, host string, coreURL string, ftpHost string, ftpUser string, ftpPassword string) Adapter {
-	app := core.NewApplication(version, internalAPIKey, host, ftpHost, ftpUser, ftpPassword)
+func NewWebAdapter(version string, port string, appID string, orgID string, internalAPIKey string, host string, coreURL string, ftpHost string, ftpUser string, ftpPassword string) Adapter {
+	app := core.NewApplication(version, internalAPIKey, appID, orgID, host, ftpHost, ftpUser, ftpPassword)
 	apis := NewApisHandler(app)
 	auth := newAuth(host, coreURL)
 	return Adapter{port: port, apis: apis, auth: auth}

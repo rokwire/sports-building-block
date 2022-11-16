@@ -88,11 +88,11 @@ func (app *Application) UpdateConfig(cfgBytes []byte) error {
 }
 
 // NewApplication creates new Application instance
-func NewApplication(version string, internalAPIKey string, host string, ftpHost string, ftpUser string, ftpPassword string) *Application {
+func NewApplication(version string, internalAPIKey string, appID string, orgID string, host string, ftpHost string, ftpUser string, ftpPassword string) *Application {
 	sa := storage.NewStorageAdapter()
 
 	// Here we define current sport provider!
-	sp := sidearm.NewProvider(internalAPIKey, host, ftpHost, ftpUser, ftpPassword)
+	sp := sidearm.NewProvider(internalAPIKey, host, ftpHost, ftpUser, ftpPassword, appID, orgID)
 	sp.Start()
 
 	return &Application{version: version, storage: *sa, provider: sp}
