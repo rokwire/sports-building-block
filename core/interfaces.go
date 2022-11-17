@@ -23,6 +23,12 @@ type Storage interface {
 	GetSports()
 }
 
+// Recipient entity
+type Recipient struct {
+	UserID string `json:"user_id"`
+	Name   string `json:"name"`
+}
+
 // Provider interface has to be implemented by all sports providers
 type Provider interface {
 	GetNews(id *string, sport []string, limit int) ([]model.News, error)

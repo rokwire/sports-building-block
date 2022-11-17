@@ -47,9 +47,9 @@ type Provider struct {
 }
 
 // NewProvider creates new provider instance
-func NewProvider(internalAPIKey string, host string, ftpHost string, ftpUser string, ftpPassword string) *Provider {
+func NewProvider(internalAPIKey string, host string, ftpHost string, ftpUser string, ftpPassword string, appID string, orgID string) *Provider {
 	config := source.NewConfig()
-	notifications := notifications.New(internalAPIKey, host)
+	notifications := notifications.New(internalAPIKey, host, appID, orgID)
 	stats := livestats.New(notifications, config, ftpHost, ftpUser, ftpPassword)
 	return &Provider{stats: stats, config: config, notifications: notifications}
 }
