@@ -19,6 +19,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sport/core"
+	"sport/core/model"
+	web "sport/driver/web/auth"
 
 	"github.com/rokwire/core-auth-library-go/v2/authorization"
 	"github.com/rokwire/core-auth-library-go/v2/authservice"
@@ -28,11 +31,11 @@ import (
 type auth struct {
 	host      string
 	tokenAuth *tokenauth.TokenAuth
+	coreAuth  *web.CoreAuth
 }
 
-func newAuth(host string, coreURL string) *auth {
+func newAuth(host string, coreURL string, app *core.Application, config model.Config) *auth {
 	sportsServiceURL := fmt.Sprintf("%s/sports-service", host)
-
 	authService := authservice.AuthService{
 		ServiceID:   "sports-service",
 		ServiceHost: sportsServiceURL,
@@ -56,7 +59,9 @@ func newAuth(host string, coreURL string) *auth {
 		log.Printf("auth -> newAuth: FAILED to init token auth: %s", err.Error())
 	}
 
-	auth := auth{host: host, tokenAuth: tokenAuth}
+	coreAuth := web.NewCoreAuth(app, config)
+
+	auth := auth{host: host, tokenAuth: tokenAuth, coreAuth: coreAuth}
 	return &auth
 }
 
