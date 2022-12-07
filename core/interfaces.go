@@ -31,14 +31,14 @@ type Recipient struct {
 
 // Provider interface has to be implemented by all sports providers
 type Provider interface {
-	GetNews(id *string, sport []string, limit int) ([]model.News, error)
-	GetCoaches(sport string) ([]model.Coach, error)
-	GetPlayers(sport string) ([]model.Player, error)
-	GetSocialNetworks() ([]model.SportSocial, error)
-	GetGames(sports []string, id *string, startDate *string, endDate *string, limit int) ([]model.Game, error)
-	GetTeamSchedule(sport string, year *int) (*model.Schedule, error)
-	GetTeamRecord(sport string, year *int) (*model.Record, error)
-	GetLiveGames() ([]model.LiveGame, error)
+	GetNews(id *string, sport []string, limit int, orgID string, appID string) ([]model.News, error)
+	GetCoaches(sport string, orgID string, appID string) ([]model.Coach, error)
+	GetPlayers(sport string, orgID string, appID string) ([]model.Player, error)
+	GetSocialNetworks(orgID string, appID string) ([]model.SportSocial, error)
+	GetGames(sports []string, id *string, startDate *string, endDate *string, limit int, orgID string, appID string) ([]model.Game, error)
+	GetTeamSchedule(sport string, year *int, orgID string, appID string) (*model.Schedule, error)
+	GetTeamRecord(sport string, year *int, orgID string, appID string) (*model.Record, error)
+	GetLiveGames(orgID string, appID string) ([]model.LiveGame, error)
 	GetConfig() (map[string]interface{}, error)
 	UpdateConfig(data []byte) error
 }

@@ -63,12 +63,12 @@ func (p *Provider) Start() {
 }
 
 // GetNews retrieves the news from sidearm service
-func (p *Provider) GetNews(id *string, sports []string, limit int) ([]model.News, error) {
+func (p *Provider) GetNews(id *string, sports []string, limit int, orgID string, appID string) ([]model.News, error) {
 	return p.loadNews(id, sports, limit)
 }
 
 // GetCoaches retrieves the coaches from sidearm service
-func (p *Provider) GetCoaches(sport string) ([]model.Coach, error) {
+func (p *Provider) GetCoaches(sport string, orgID string, appID string) ([]model.Coach, error) {
 	coachesEndpoint := "/services/coaches_xml.aspx?format=json"
 
 	if sport != "" {
@@ -104,7 +104,7 @@ func (p *Provider) GetCoaches(sport string) ([]model.Coach, error) {
 }
 
 // GetPlayers retrieves the players from sidearm service
-func (p *Provider) GetPlayers(sport string) ([]model.Player, error) {
+func (p *Provider) GetPlayers(sport string, orgID string, appID string) ([]model.Player, error) {
 	rosterEndpoint := "/services/roster_xml.aspx?format=json"
 
 	if sport != "" {
@@ -150,7 +150,7 @@ func (p *Provider) GetPlayers(sport string) ([]model.Player, error) {
 }
 
 // GetSocialNetworks retrieves social accounts from sidearm service
-func (p *Provider) GetSocialNetworks() ([]model.SportSocial, error) {
+func (p *Provider) GetSocialNetworks(orgID string, appID string) ([]model.SportSocial, error) {
 	url := host + "/api/assets?operation=sports"
 	bodyBytes, err := request(http.MethodGet, url, nil)
 
@@ -181,7 +181,7 @@ func (p *Provider) GetSocialNetworks() ([]model.SportSocial, error) {
 }
 
 // GetGames retrieves games from sidearm
-func (p *Provider) GetGames(sports []string, id *string, startDate *string, endDate *string, limit int) ([]model.Game, error) {
+func (p *Provider) GetGames(sports []string, id *string, startDate *string, endDate *string, limit int, orgID string, appID string) ([]model.Game, error) {
 	gamesEndpoint := "/services/schedule_xml_2.aspx?format=json"
 
 	if len(sports) > 0 {
@@ -230,7 +230,7 @@ func (p *Provider) GetGames(sports []string, id *string, startDate *string, endD
 }
 
 // GetTeamSchedule retrieves team schedule for specific year
-func (p *Provider) GetTeamSchedule(sport string, year *int) (*model.Schedule, error) {
+func (p *Provider) GetTeamSchedule(sport string, year *int, orgID string, appID string) (*model.Schedule, error) {
 	s, err := getSportSeason(sport, year)
 	if err != nil {
 		return nil, err
@@ -250,7 +250,7 @@ func (p *Provider) GetTeamSchedule(sport string, year *int) (*model.Schedule, er
 }
 
 // GetTeamRecord retrieves team record for specific year
-func (p *Provider) GetTeamRecord(sport string, year *int) (*model.Record, error) {
+func (p *Provider) GetTeamRecord(sport string, year *int, orgID string, appID string) (*model.Record, error) {
 	s, err := getSportSeason(sport, year)
 	if err != nil {
 		return nil, err
@@ -271,7 +271,7 @@ func (p *Provider) GetTeamRecord(sport string, year *int) (*model.Record, error)
 }
 
 // GetLiveGames retrieves current live games
-func (p *Provider) GetLiveGames() ([]model.LiveGame, error) {
+func (p *Provider) GetLiveGames(orgID string, appID string) ([]model.LiveGame, error) {
 	return p.stats.LiveData(), nil
 }
 
