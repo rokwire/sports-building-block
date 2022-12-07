@@ -24,7 +24,7 @@ type Adapter struct {
 }
 
 // GetSports retrieves sport definitions
-func (sa *Adapter) GetSports() string {
+func (sa *Adapter) GetSports(orgID string) string {
 	fileBytes, err := ioutil.ReadFile("driven/storage/sport-definitions.json")
 	if err != nil {
 		log.Printf("Failed to read sport-definitions.json file. Reason: %s", err.Error())

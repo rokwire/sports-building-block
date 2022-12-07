@@ -33,8 +33,8 @@ func (app *Application) GetVersion() string {
 }
 
 // GetSports retrieves sport definitions
-func (app *Application) GetSports() string {
-	return app.storage.GetSports()
+func (app *Application) GetSports(orgID string) string {
+	return app.storage.GetSports(orgID)
 }
 
 // GetNews retrieves sport news

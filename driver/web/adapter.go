@@ -19,15 +19,22 @@ import (
 	"log"
 	"net/http"
 	"sport/core"
+	"sport/core/model"
 
 	"github.com/gorilla/mux"
+	"github.com/rokwire/core-auth-library-go/tokenauth"
+	"github.com/rokwire/logging-library-go/v2/errors"
+	"github.com/rokwire/logging-library-go/v2/logs"
+	"github.com/rokwire/logging-library-go/v2/logutils"
 )
 
 // Adapter structure
 type Adapter struct {
-	port string
-	apis *ApisHandler
-	auth *auth
+	port      string
+	apis      *ApisHandler
+	auth      *auth
+	logger    *logs.Logger
+	tokenAuth *tokenauth.TokenAuth
 }
 
 // Start adapter
@@ -47,14 +54,14 @@ func (we Adapter) Start() {
 	v2SubRouter.HandleFunc("/config", we.corePermissionWrapFunc(we.apis.GetConfig)).Methods("GET")
 	v2SubRouter.HandleFunc("/config", we.corePermissionWrapFunc(we.apis.UpdateConfig)).Methods("PUT")
 	v2SubRouter.HandleFunc("/sports", we.coreWrapFunc(we.apis.GetSports)).Methods("GET")
-	v2SubRouter.HandleFunc("/news", we.coreWrapFunc(we.apis.GetNews)).Methods("GET")
+	/*v2SubRouter.HandleFunc("/news", we.coreWrapFunc(we.apis.GetNews)).Methods("GET")
 	v2SubRouter.HandleFunc("/coaches", we.coreWrapFunc(we.apis.GetCoaches)).Methods("GET")
 	v2SubRouter.HandleFunc("/players", we.coreWrapFunc(we.apis.GetPlayers)).Methods("GET")
 	v2SubRouter.HandleFunc("/social", we.coreWrapFunc(we.apis.GetSocialNetworks)).Methods("GET")
 	v2SubRouter.HandleFunc("/games", we.coreWrapFunc(we.apis.GetGames)).Methods("GET")
 	v2SubRouter.HandleFunc("/team-schedule", we.coreWrapFunc(we.apis.GetTeamSchedule)).Methods("GET")
 	v2SubRouter.HandleFunc("/team-record", we.coreWrapFunc(we.apis.GetTeamRecord)).Methods("GET")
-	v2SubRouter.HandleFunc("/live-games", we.coreWrapFunc(we.apis.GetLiveGames)).Methods("GET")
+	v2SubRouter.HandleFunc("/live-games", we.coreWrapFunc(we.apis.GetLiveGames)).Methods("GET")*/
 	//////////////////////////////////////////////////
 
 	err := http.ListenAndServe(":"+we.port, router)
@@ -63,19 +70,94 @@ func (we Adapter) Start() {
 	}
 }
 
-func (we Adapter) coreWrapFunc(handler http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		logRequest(r)
+type handlerFunc = func(*logs.Log, *http.Request, http.ResponseWriter, *tokenauth.Claims) logs.HTTPResponse
 
-		err := we.auth.coreAuthCheck(w, r)
+func (we Adapter) coreWrapFunc(handler handlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		logObj := we.logger.NewRequestLog(r)
+
+		logObj.RequestReceived()
+
+		claims, err := we.auth.coreAuth.Check(r)
+		if err != nil {
+			if claims == nil {
+				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				return
+			}
+
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			return
+		}
+
+		// process the request
+		response := handler(logObj, r, w, claims)
+
+		/// return response
+		// headers
+		if len(response.Headers) > 0 {
+			for key, values := range response.Headers {
+				if len(values) > 0 {
+					for _, value := range values {
+						w.Header().Add(key, value)
+					}
+				}
+			}
+		}
+		// response code
+		w.WriteHeader(response.ResponseCode)
+		// body
+		if len(response.Body) > 0 {
+			w.Write(response.Body)
+		}
+
+		logObj.RequestComplete()
+		//logRequest(r)
+		/*log := we.logger.NewRequestLog(r)
+		log.RequestReceived()
+
+		claims, err := we.auth.coreAuth.Check(r)
+		if err != nil {
+			if claims == nil {
+				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				return
+			}
+
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			return
+		}
+
+		// process the request
+		response := handler(log, r, claims)
+
+		/// return response
+		// headers
+		if len(response.Headers) > 0 {
+			for key, values := range response.Headers {
+				if len(values) > 0 {
+					for _, value := range values {
+						w.Header().Add(key, value)
+					}
+				}
+			}
+		}
+		// response code
+		w.WriteHeader(response.ResponseCode)
+		// body
+		if len(response.Body) > 0 {
+			w.Write(response.Body)
+		}
+
+		log.RequestComplete()*/
+		//fmt.Print(claims)
+		/*err := we.auth.coreAuthCheck(w, r)
 
 		if err != nil {
 			errMsg := fmt.Sprintf("Unauthorized: %s", err.Error())
 			http.Error(w, errMsg, http.StatusUnauthorized)
 			return
-		}
+		}*/
 
-		handler(w, r)
+		//	handler(log, r, claims)
 	}
 }
 
@@ -93,6 +175,23 @@ func (we Adapter) corePermissionWrapFunc(handler http.HandlerFunc) http.HandlerF
 
 		handler(w, r)
 	}
+}
+
+// Check checks the request contains a valid Core access token
+func (we Adapter) Check(r *http.Request) (*tokenauth.Claims, error) {
+	claims, err := we.tokenAuth.CheckRequestTokens(r)
+	if err != nil || claims == nil {
+		log.Printf("error validate token: %s", err)
+		return nil, err
+	}
+
+	if !claims.Admin {
+		err = errors.ErrorData(logutils.StatusInvalid, logutils.TypeClaim, logutils.StringArgs("admin"))
+		log.Println(err)
+		return nil, err
+	}
+
+	return claims, nil
 }
 
 func logRequest(req *http.Request) {
@@ -123,9 +222,9 @@ func logRequest(req *http.Request) {
 }
 
 // NewWebAdapter creates new instance
-func NewWebAdapter(version string, port string, appID string, orgID string, internalAPIKey string, host string, coreURL string, ftpHost string, ftpUser string, ftpPassword string) Adapter {
+func NewWebAdapter(version string, port string, appID string, orgID string, internalAPIKey string, host string, coreURL string, ftpHost string, ftpUser string, ftpPassword string, logger *logs.Logger, config model.Config) Adapter {
 	app := core.NewApplication(version, internalAPIKey, appID, orgID, host, ftpHost, ftpUser, ftpPassword)
 	apis := NewApisHandler(app)
-	auth := newAuth(host, coreURL)
-	return Adapter{port: port, apis: apis, auth: auth}
+	auth := newAuth(host, coreURL, app, config)
+	return Adapter{port: port, apis: apis, auth: auth, logger: logger}
 }

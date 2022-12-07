@@ -23,6 +23,9 @@ import (
 	"regexp"
 	"sport/core"
 	"strconv"
+
+	"github.com/rokwire/core-auth-library-go/tokenauth"
+	"github.com/rokwire/logging-library-go/v2/logs"
 )
 
 // ApisHandler structure
@@ -37,14 +40,14 @@ func (a *ApisHandler) GetVersion(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetSports retrieves sport definitions
-func (a *ApisHandler) GetSports(w http.ResponseWriter, r *http.Request) {
-	sportDefinitions := a.app.GetSports()
+func (a *ApisHandler) GetSports(l *logs.Log, r *http.Request, w http.ResponseWriter, claims *tokenauth.Claims) logs.HTTPResponse {
+	sportDefinitions := a.app.GetSports(claims.OrgID)
 	if sportDefinitions == "" {
-		http.Error(w, "Failed to retrieve sports.", http.StatusInternalServerError)
-		return
+		http.Error(nil, "Failed to retrieve sports.", http.StatusInternalServerError)
+		//return
 	}
-
 	successfulResponse(w, []byte(sportDefinitions))
+	return l.HTTPResponseSuccess()
 }
 
 // GetNews retrieves sport news
