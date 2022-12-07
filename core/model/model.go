@@ -17,6 +17,8 @@ package model
 // News structure
 type News struct {
 	ID          string `json:"id"`
+	OrgID       string `json:"org_id" bson:"org_id"`
+	AppID       string `json:"app_id" bson:"app_id"`
 	Title       string `json:"title"`
 	Link        string `json:"link"`
 	Category    string `json:"category"`
@@ -31,6 +33,8 @@ type News struct {
 // Coach structure
 type Coach struct {
 	ID        string  `json:"id,omitempty"`
+	OrgID     string  `json:"org_id" bson:"org_id"`
+	AppID     string  `json:"app_id" bson:"app_id"`
 	Name      string  `json:"name,omitempty"`
 	FirstName string  `json:"first_name,omitempty"`
 	LastName  string  `json:"last_name,omitempty"`
@@ -44,6 +48,8 @@ type Coach struct {
 // Player structure
 type Player struct {
 	ID         string  `json:"id,omitempty"`
+	OrgID      string  `json:"org_id" bson:"org_id"`
+	AppID      string  `json:"app_id" bson:"app_id"`
 	Name       string  `json:"name,omitempty"`
 	FirstName  string  `json:"first_name,omitempty"`
 	LastName   string  `json:"last_name,omitempty"`
@@ -62,12 +68,16 @@ type Player struct {
 
 // Photos structure
 type Photos struct {
+	OrgID     string `json:"org_id" bson:"org_id"`
+	AppID     string `json:"app_id" bson:"app_id"`
 	Fullsize  string `json:"fullsize,omitempty"`
 	Thumbnail string `json:"thumbnail,omitempty"`
 }
 
 // SportSocial structure
 type SportSocial struct {
+	OrgID          string `json:"org_id" bson:"org_id"`
+	AppID          string `json:"app_id" bson:"app_id"`
 	SportShortName string `json:"shortname,omitempty"`
 	TwitterName    string `json:"sport_twitter_name,omitempty"`
 	InstagramName  string `json:"sport_instagram_name,omitempty"`
@@ -77,6 +87,8 @@ type SportSocial struct {
 // Game structure
 type Game struct {
 	ID             string    `json:"id,omitempty"`
+	OrgID          string    `json:"org_id" bson:"org_id"`
+	AppID          string    `json:"app_id" bson:"app_id"`
 	Date           string    `json:"date,omitempty"`
 	DateTimeUtc    string    `json:"datetime_utc,omitempty"`
 	EndDate        string    `json:"end_date,omitempty"`
@@ -95,18 +107,24 @@ type Game struct {
 
 // Sport structure
 type Sport struct {
+	OrgID     string `json:"org_id" bson:"org_id"`
+	AppID     string `json:"app_id" bson:"app_id"`
 	Title     string `json:"title,omitempty"`
 	ShortName string `json:"shortname,omitempty"`
 }
 
 // Location structure
 type Location struct {
+	OrgID    string `json:"org_id" bson:"org_id"`
+	AppID    string `json:"app_id" bson:"app_id"`
 	Location string `json:"location,omitempty"`
 	HAN      string `json:"HAN,omitempty"`
 }
 
 // Links structure
 type Links struct {
+	OrgID     string    `json:"org_id" bson:"org_id"`
+	AppID     string    `json:"app_id" bson:"app_id"`
 	Livestats string    `json:"livestats,omitempty"`
 	Video     string    `json:"video,omitempty"`
 	Audio     string    `json:"audio,omitempty"`
@@ -117,6 +135,8 @@ type Links struct {
 // GameInfo structure
 type GameInfo struct {
 	ID            string `json:"id,omitempty"`
+	OrgID         string `json:"org_id" bson:"org_id"`
+	AppID         string `json:"app_id" bson:"app_id"`
 	URL           string `json:"url,omitempty"`
 	StoryImageURL string `json:"story_image_url,omitempty"`
 	Text          string `json:"text,omitempty"`
@@ -124,12 +144,16 @@ type GameInfo struct {
 
 // Opponent structure
 type Opponent struct {
+	OrgID     string `json:"org_id" bson:"org_id"`
+	AppID     string `json:"app_id" bson:"app_id"`
 	Name      string `json:"name,omitempty"`
 	LogoImage string `json:"logo_image,omitempty"`
 }
 
 // Result structure
 type Result struct {
+	OrgID         string `json:"org_id" bson:"org_id"`
+	AppID         string `json:"app_id" bson:"app_id"`
 	Status        string `json:"status,omitempty"`
 	TeamScore     string `json:"team_score,omitempty"`
 	OpponentScore string `json:"opponent_score,omitempty"`
@@ -137,12 +161,16 @@ type Result struct {
 
 // Schedule structure
 type Schedule struct {
+	OrgID string `json:"org_id" bson:"org_id"`
+	AppID string `json:"app_id" bson:"app_id"`
 	Label string `json:"label,omitempty"`
 	Games []Game `json:"games,omitempty"`
 }
 
 // Record structure
 type Record struct {
+	OrgID            string `json:"org_id" bson:"org_id"`
+	AppID            string `json:"app_id" bson:"app_id"`
 	OverallRecord    string `json:"overall_record_unformatted,omitempty"`
 	ConferenceRecord string `json:"conference_record,omitempty"`
 	Streak           string `json:"streak,omitempty"`
