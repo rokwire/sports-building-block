@@ -68,6 +68,7 @@ type Photos struct {
 
 // SportSocial structure
 type SportSocial struct {
+	OrgID          string `json:"org_id"`
 	SportShortName string `json:"shortname,omitempty"`
 	TwitterName    string `json:"sport_twitter_name,omitempty"`
 	InstagramName  string `json:"sport_instagram_name,omitempty"`
