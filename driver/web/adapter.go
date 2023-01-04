@@ -21,13 +21,19 @@ import (
 	"sport/core"
 
 	"github.com/gorilla/mux"
+	"github.com/rokwire/core-auth-library-go/v2/tokenauth"
+	"github.com/rokwire/logging-library-go/v2/logs"
+
+	"github.com/getkin/kin-openapi/routers"
 )
 
 // Adapter structure
 type Adapter struct {
-	port string
-	apis *ApisHandler
-	auth *auth
+	port          string
+	apis          *ApisHandler
+	auth          *auth
+	logger        *logs.Logger
+	openAPIRouter routers.Router
 }
 
 // Start adapter
@@ -47,14 +53,14 @@ func (we Adapter) Start() {
 	v2SubRouter.HandleFunc("/config", we.corePermissionWrapFunc(we.apis.GetConfig)).Methods("GET")
 	v2SubRouter.HandleFunc("/config", we.corePermissionWrapFunc(we.apis.UpdateConfig)).Methods("PUT")
 	v2SubRouter.HandleFunc("/sports", we.coreWrapFunc(we.apis.GetSports)).Methods("GET")
-	v2SubRouter.HandleFunc("/news", we.coreWrapFunc(we.apis.GetNews)).Methods("GET")
+	/*v2SubRouter.HandleFunc("/news", we.coreWrapFunc(we.apis.GetNews)).Methods("GET")
 	v2SubRouter.HandleFunc("/coaches", we.coreWrapFunc(we.apis.GetCoaches)).Methods("GET")
 	v2SubRouter.HandleFunc("/players", we.coreWrapFunc(we.apis.GetPlayers)).Methods("GET")
 	v2SubRouter.HandleFunc("/social", we.coreWrapFunc(we.apis.GetSocialNetworks)).Methods("GET")
 	v2SubRouter.HandleFunc("/games", we.coreWrapFunc(we.apis.GetGames)).Methods("GET")
 	v2SubRouter.HandleFunc("/team-schedule", we.coreWrapFunc(we.apis.GetTeamSchedule)).Methods("GET")
 	v2SubRouter.HandleFunc("/team-record", we.coreWrapFunc(we.apis.GetTeamRecord)).Methods("GET")
-	v2SubRouter.HandleFunc("/live-games", we.coreWrapFunc(we.apis.GetLiveGames)).Methods("GET")
+	v2SubRouter.HandleFunc("/live-games", we.coreWrapFunc(we.apis.GetLiveGames)).Methods("GET")*/
 	//////////////////////////////////////////////////
 
 	err := http.ListenAndServe(":"+we.port, router)
@@ -63,20 +69,29 @@ func (we Adapter) Start() {
 	}
 }
 
-func (we Adapter) coreWrapFunc(handler http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		logRequest(r)
+type handlerFunc = func(*logs.Log, *http.Request, *tokenauth.Claims) logs.HTTPResponse
 
-		err := we.auth.coreAuthCheck(w, r)
+func (we Adapter) coreWrapFunc(handler handlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		logObj := we.logger.NewRequestLog(req)
+		logObj.RequestReceived()
 
+		err := we.auth.coreAuthCheck(w, req)
 		if err != nil {
 			errMsg := fmt.Sprintf("Unauthorized: %s", err.Error())
 			http.Error(w, errMsg, http.StatusUnauthorized)
 			return
 		}
 
-		handler(w, r)
+		claims, _ := we.auth.claimsCheck(w, req)
+		logObj.SetContext("account_id", claims.Subject)
+		var response logs.HTTPResponse
+		response = handler(logObj, req, claims)
+
+		logObj.SendHTTPResponse(w, response)
+		logObj.RequestComplete()
 	}
+
 }
 
 func (we Adapter) corePermissionWrapFunc(handler http.HandlerFunc) http.HandlerFunc {
@@ -123,8 +138,8 @@ func logRequest(req *http.Request) {
 }
 
 // NewWebAdapter creates new instance
-func NewWebAdapter(version string, port string, appID string, orgID string, internalAPIKey string, host string, coreURL string, ftpHost string, ftpUser string, ftpPassword string) Adapter {
-	app := core.NewApplication(version, internalAPIKey, appID, orgID, host, ftpHost, ftpUser, ftpPassword)
+func NewWebAdapter(version string, port string, appID string, orgID string, internalAPIKey string, host string, coreURL string, ftpHost string, ftpUser string, ftpPassword string, storage core.Storage) Adapter {
+	app := core.NewApplication(version, internalAPIKey, appID, orgID, host, ftpHost, ftpUser, ftpPassword, storage)
 	apis := NewApisHandler(app)
 	auth := newAuth(host, coreURL)
 	return Adapter{port: port, apis: apis, auth: auth}
