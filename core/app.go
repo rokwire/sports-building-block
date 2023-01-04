@@ -17,13 +17,14 @@ package core
 import (
 	"sport/core/model"
 	"sport/driven/provider/sidearm"
-	"sport/driven/storage"
+
+	"github.com/rokwire/logging-library-go/v2/logs"
 )
 
 // Application structure
 type Application struct {
 	version  string
-	storage  storage.Adapter
+	storage  Storage
 	provider Provider
 }
 
@@ -33,8 +34,8 @@ func (app *Application) GetVersion() string {
 }
 
 // GetSports retrieves sport definitions
-func (app *Application) GetSports() string {
-	return app.storage.GetSports()
+func (app *Application) GetSports(l *logs.Log, orgID string) ([]model.SportsDefinitions, error) {
+	return app.storage.GetSportsDefinitions(l, orgID)
 }
 
 // GetNews retrieves sport news
@@ -88,12 +89,10 @@ func (app *Application) UpdateConfig(cfgBytes []byte) error {
 }
 
 // NewApplication creates new Application instance
-func NewApplication(version string, internalAPIKey string, appID string, orgID string, host string, ftpHost string, ftpUser string, ftpPassword string) *Application {
-	sa := storage.NewStorageAdapter()
-
+func NewApplication(version string, internalAPIKey string, appID string, orgID string, host string, ftpHost string, ftpUser string, ftpPassword string, storage Storage) *Application {
 	// Here we define current sport provider!
 	sp := sidearm.NewProvider(internalAPIKey, host, ftpHost, ftpUser, ftpPassword, appID, orgID)
 	sp.Start()
 
-	return &Application{version: version, storage: *sa, provider: sp}
+	return &Application{version: version, storage: storage, provider: sp}
 }

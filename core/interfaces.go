@@ -16,11 +16,15 @@ package core
 
 import (
 	"sport/core/model"
+	"sport/driven/storage"
+
+	"github.com/rokwire/logging-library-go/v2/logs"
 )
 
 // Storage interface has to be implemented by all Storage adapters
 type Storage interface {
-	GetSports()
+	RegisterStorageListener(storageListener storage.Listener)
+	GetSportsDefinitions(l *logs.Log, orgID string) ([]model.SportsDefinitions, error)
 }
 
 // Recipient entity
