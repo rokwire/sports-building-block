@@ -15,25 +15,73 @@
 package storage
 
 import (
-	"io/ioutil"
-	"log"
+	"sport/core/model"
+	"strconv"
+	"time"
+
+	"github.com/rokwire/logging-library-go/v2/errors"
+	"github.com/rokwire/logging-library-go/v2/logs"
+	"github.com/rokwire/logging-library-go/v2/logutils"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Adapter implements Storage interface
+// Adapter implements the Storage interface
 type Adapter struct {
+	db     *database
+	logger *logs.Logger
 }
 
-// GetSports retrieves sport definitions
-func (sa *Adapter) GetSports() string {
-	fileBytes, err := ioutil.ReadFile("driven/storage/sport-definitions.json")
+// Start starts the storage
+func (sa *Adapter) Start() error {
+	//start db
+	err := sa.db.start()
 	if err != nil {
-		log.Printf("Failed to read sport-definitions.json file. Reason: %s", err.Error())
-		return "" // the "zero" value for strings is empty string
+		return errors.WrapErrorAction(logutils.ActionInitialize, "storage adapter", nil, err)
 	}
-	return string(fileBytes)
+
+	//register storage listener
+	sl := storageListener{adapter: sa}
+	sa.RegisterStorageListener(&sl)
+
+	return err
 }
 
-// NewStorageAdapter creates new instance
-func NewStorageAdapter() *Adapter {
-	return &Adapter{}
+// RegisterStorageListener registers a data change listener with the storage adapter
+func (sa *Adapter) RegisterStorageListener(storageListener Listener) {
+	sa.db.listeners = append(sa.db.listeners, storageListener)
+}
+
+// GetSportsDefinitions retrieves sport definitions
+func (sa *Adapter) GetSportsDefinitions(l *logs.Log, orgID string) ([]model.SportsDefinitions, error) {
+	filter := bson.D{
+		primitive.E{Key: "org_id", Value: orgID},
+	}
+	var sports []model.SportsDefinitions
+	err := sa.db.sportDefinitions.Find(filter, &sports, nil)
+	if err != nil {
+		return nil, errors.WrapErrorAction(logutils.ActionFind, "sport-definitions", nil, err)
+	}
+	return sports, nil
+}
+
+// NewStorageAdapter creates a new storage adapter instance
+func NewStorageAdapter(mongoDBAuth string, mongoDBName string, mongoTimeout string, logger *logs.Logger) *Adapter {
+	timeoutInt, err := strconv.Atoi(mongoTimeout)
+	if err != nil {
+		logger.Warn("Setting default Mongo timeout - 1000")
+		timeoutInt = 1000
+	}
+	timeout := time.Millisecond * time.Duration(timeoutInt)
+
+	db := &database{mongoDBAuth: mongoDBAuth, mongoDBName: mongoDBName, mongoTimeout: timeout, logger: logger}
+	return &Adapter{db: db, logger: logger}
+}
+
+type storageListener struct {
+	adapter *Adapter
+}
+
+// Listener represents storage listener
+type Listener interface {
 }
