@@ -71,15 +71,11 @@ func (a *ApisHandler) GetNews(l *logs.Log, r *http.Request, claims *tokenauth.Cl
 
 	news, err := a.app.GetNews(id, sports, limit, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve news. Reason: %s", err.Error())
-		log.Println(errMsg)
-		return l.HTTPResponseErrorAction("error get news data", "news", nil, err, http.StatusInternalServerError, true)
+		return l.HTTPResponseErrorAction("Failed to retrieve news. Reason: %s", "news", nil, err, http.StatusInternalServerError, true)
 	}
 
 	newsJSON, err := json.Marshal(news)
 	if err != nil {
-		errMsg := "Failed to parse news to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
 		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "news", nil, err, http.StatusInternalServerError, false)
 
 	}
