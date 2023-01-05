@@ -139,58 +139,39 @@ func (a *ApisHandler) GetSocialNetworks(l *logs.Log, r *http.Request, claims *to
 }
 
 // GetGames retrieves games
-func (a *ApisHandler) GetGames(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetGames(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	sports := r.URL.Query()["sport"]
 	id, err := parseID(r)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "games", nil, err, http.StatusInternalServerError, true)
 	}
 
 	startDate, err := parseDate("start", r)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error start date value", "games", nil, err, http.StatusInternalServerError, true)
 	}
 
 	endDate, err := parseDate("end", r)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error end date value", "games", nil, err, http.StatusInternalServerError, true)
 	}
 
 	limit, err := parseLimit(r)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error limit value", "games", nil, err, http.StatusInternalServerError, true)
 	}
 
-	games, err := a.app.GetGames(sports, id, startDate, endDate, limit)
+	games, err := a.app.GetGames(sports, id, startDate, endDate, limit, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve games. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(games) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve games. Reason: %s", "games", nil, err, http.StatusInternalServerError, true)
 	}
 
 	gamesJSON, err := json.Marshal(games)
 	if err != nil {
-		errMsg := "Failed to parse games to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "games", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(gamesJSON))
+	return l.HTTPResponseSuccessJSON(gamesJSON)
 }
 
 // GetTeamSchedule retrieves schedule for a team/sport

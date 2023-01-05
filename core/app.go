@@ -59,7 +59,8 @@ func (app *Application) GetSocialNetworks(orgID string) ([]model.SportSocial, er
 }
 
 // GetGames retrieves games based on selected filters
-func (app *Application) GetGames(sports []string, id *string, startDate *string, endDate *string, limit int) ([]model.Game, error) {
+func (app *Application) GetGames(sports []string, id *string,
+	startDate *string, endDate *string, limit int, orgID string) ([]model.Game, error) {
 	return app.provider.GetGames(sports, id, startDate, endDate, limit)
 }
 
