@@ -44,12 +44,12 @@ func (app *Application) GetNews(id *string, sports []string, limit int, orgID st
 }
 
 // GetCoaches retrieves the coaches for specific sport
-func (app *Application) GetCoaches(sport string) ([]model.Coach, error) {
+func (app *Application) GetCoaches(sport string, orgID string) ([]model.Coach, error) {
 	return app.provider.GetCoaches(sport)
 }
 
 // GetPlayers retrieves the players for specific sport
-func (app *Application) GetPlayers(sport string) ([]model.Player, error) {
+func (app *Application) GetPlayers(sport string, orgID string) ([]model.Player, error) {
 	return app.provider.GetPlayers(sport)
 }
 

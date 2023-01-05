@@ -84,67 +84,43 @@ func (a *ApisHandler) GetNews(l *logs.Log, r *http.Request, claims *tokenauth.Cl
 }
 
 // GetCoaches retrieves coaches for a team/sport
-func (a *ApisHandler) GetCoaches(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetCoaches(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	sport, err := parseSport(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "coaches", nil, err, http.StatusInternalServerError, true)
 	}
 
-	coaches, err := a.app.GetCoaches(*sport)
+	coaches, err := a.app.GetCoaches(*sport, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve coaches. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(coaches) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve coaches. Reason: %s", "coaches", nil, err, http.StatusInternalServerError, true)
 	}
 
 	coachesJSON, err := json.Marshal(coaches)
 	if err != nil {
-		errMsg := "Failed to parse coaches to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "coaches", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(coachesJSON))
+	return l.HTTPResponseSuccessJSON(coachesJSON)
 }
 
 // GetPlayers retrieves players for a team/sport
-func (a *ApisHandler) GetPlayers(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetPlayers(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	sport, err := parseSport(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "players", nil, err, http.StatusInternalServerError, true)
 	}
 
-	players, err := a.app.GetPlayers(*sport)
+	players, err := a.app.GetPlayers(*sport, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve players. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(players) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve players. Reason: %s", "players", nil, err, http.StatusInternalServerError, true)
 	}
 
 	playersJSON, err := json.Marshal(players)
 	if err != nil {
-		errMsg := "Failed to parse players to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "players", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(playersJSON))
+	return l.HTTPResponseSuccessJSON(playersJSON)
 }
 
 // GetSocialNetworks retrieves social networks
