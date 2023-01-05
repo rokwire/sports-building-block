@@ -54,7 +54,7 @@ func (app *Application) GetPlayers(sport string, orgID string) ([]model.Player, 
 }
 
 // GetSocialNetworks retrieves the social accounts
-func (app *Application) GetSocialNetworks() ([]model.SportSocial, error) {
+func (app *Application) GetSocialNetworks(orgID string) ([]model.SportSocial, error) {
 	return app.provider.GetSocialNetworks()
 }
 

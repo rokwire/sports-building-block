@@ -124,29 +124,18 @@ func (a *ApisHandler) GetPlayers(l *logs.Log, r *http.Request, claims *tokenauth
 }
 
 // GetSocialNetworks retrieves social networks
-func (a *ApisHandler) GetSocialNetworks(w http.ResponseWriter, r *http.Request) {
-	socNets, err := a.app.GetSocialNetworks()
+func (a *ApisHandler) GetSocialNetworks(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
+	socNets, err := a.app.GetSocialNetworks(claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve sport social networks. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(socNets) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve sport social networks. Reason: %s", "social networks", nil, err, http.StatusInternalServerError, true)
 	}
 
 	socNetsJSON, err := json.Marshal(socNets)
 	if err != nil {
-		errMsg := "Failed to parse social networks to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "social networks", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(socNetsJSON))
+	return l.HTTPResponseSuccessJSON(socNetsJSON)
 }
 
 // GetGames retrieves games
