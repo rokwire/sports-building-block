@@ -70,7 +70,7 @@ func (app *Application) GetTeamSchedule(sport string, year *int, orgID string) (
 }
 
 // GetTeamRecord retrieves the record for a sport team
-func (app *Application) GetTeamRecord(sport string, year *int) (*model.Record, error) {
+func (app *Application) GetTeamRecord(sport string, year *int, orgID string) (*model.Record, error) {
 	return app.provider.GetTeamRecord(sport, year)
 }
 

@@ -200,36 +200,28 @@ func (a *ApisHandler) GetTeamSchedule(l *logs.Log, r *http.Request, claims *toke
 }
 
 // GetTeamRecord retrieves schedule for a team/sport
-func (a *ApisHandler) GetTeamRecord(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetTeamRecord(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	sport, err := parseSport(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "team record", nil, err, http.StatusInternalServerError, true)
 	}
 
 	year, err := parseYear(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction("error year value", "team record", nil, err, http.StatusInternalServerError, true)
 	}
 
-	record, err := a.app.GetTeamRecord(*sport, year)
+	record, err := a.app.GetTeamRecord(*sport, year, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve team record. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve team record. Reason: %s", "team record", nil, err, http.StatusInternalServerError, true)
 	}
 
 	recordJSON, err := json.Marshal(record)
 	if err != nil {
-		errMsg := "Failed to parse record to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "team record", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(recordJSON))
+	return l.HTTPResponseSuccessJSON(recordJSON)
 }
 
 // GetLiveGames retrieves current live games
