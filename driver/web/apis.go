@@ -55,44 +55,36 @@ func (a *ApisHandler) GetSports(l *logs.Log, r *http.Request, claims *tokenauth.
 }
 
 // GetNews retrieves sport news
-func (a *ApisHandler) GetNews(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetNews(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	id, err := parseID(r)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error id value", "news", nil, err, http.StatusInternalServerError, true)
 	}
 
 	sports := r.URL.Query()["sport"]
 	limit, el := parseLimit(r)
 	if el != nil {
 		log.Println(el.Error())
-		http.Error(w, el.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "news", nil, err, http.StatusInternalServerError, true)
 	}
 
-	news, err := a.app.GetNews(id, sports, limit)
+	news, err := a.app.GetNews(id, sports, limit, claims.OrgID)
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to retrieve news. Reason: %s", err.Error())
 		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(news) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("error get news data", "news", nil, err, http.StatusInternalServerError, true)
 	}
 
 	newsJSON, err := json.Marshal(news)
 	if err != nil {
 		errMsg := "Failed to parse news to json."
 		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "news", nil, err, http.StatusInternalServerError, false)
+
 	}
 
-	successfulResponse(w, []byte(newsJSON))
+	return l.HTTPResponseSuccessJSON(newsJSON)
 }
 
 // GetCoaches retrieves coaches for a team/sport
