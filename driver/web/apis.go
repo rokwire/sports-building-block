@@ -175,36 +175,28 @@ func (a *ApisHandler) GetGames(l *logs.Log, r *http.Request, claims *tokenauth.C
 }
 
 // GetTeamSchedule retrieves schedule for a team/sport
-func (a *ApisHandler) GetTeamSchedule(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetTeamSchedule(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	sport, err := parseSport(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "team schedule", nil, err, http.StatusInternalServerError, true)
 	}
 
 	year, err := parseYear(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction("error year value", "team schedule", nil, err, http.StatusInternalServerError, true)
 	}
 
-	schedule, err := a.app.GetTeamSchedule(*sport, year)
+	schedule, err := a.app.GetTeamSchedule(*sport, year, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve team schedule. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve shedule. Reason: %s", "team schedule", nil, err, http.StatusInternalServerError, true)
 	}
 
 	scheduleJSON, err := json.Marshal(schedule)
 	if err != nil {
-		errMsg := "Failed to parse schedule to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "team schedule", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(scheduleJSON))
+	return l.HTTPResponseSuccessJSON(scheduleJSON)
 }
 
 // GetTeamRecord retrieves schedule for a team/sport

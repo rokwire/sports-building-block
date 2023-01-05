@@ -65,7 +65,7 @@ func (app *Application) GetGames(sports []string, id *string,
 }
 
 // GetTeamSchedule retrieves the schedule for sport in a specific year
-func (app *Application) GetTeamSchedule(sport string, year *int) (*model.Schedule, error) {
+func (app *Application) GetTeamSchedule(sport string, year *int, orgID string) (*model.Schedule, error) {
 	return app.provider.GetTeamSchedule(sport, year)
 }
 
