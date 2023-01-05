@@ -75,7 +75,7 @@ func (app *Application) GetTeamRecord(sport string, year *int, orgID string) (*m
 }
 
 // GetLiveGames retrieves details for current live games
-func (app *Application) GetLiveGames() ([]model.LiveGame, error) {
+func (app *Application) GetLiveGames(orgID string) ([]model.LiveGame, error) {
 	return app.provider.GetLiveGames()
 }
 

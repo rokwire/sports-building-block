@@ -225,18 +225,10 @@ func (a *ApisHandler) GetTeamRecord(l *logs.Log, r *http.Request, claims *tokena
 }
 
 // GetLiveGames retrieves current live games
-func (a *ApisHandler) GetLiveGames(w http.ResponseWriter, r *http.Request) {
-	liveGames, err := a.app.GetLiveGames()
+func (a *ApisHandler) GetLiveGames(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
+	liveGames, err := a.app.GetLiveGames(claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve live games. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(liveGames) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve live games. Reason: %s", "live games", nil, err, http.StatusInternalServerError, true)
 	}
 
 	var encoded []map[string]string
@@ -247,13 +239,10 @@ func (a *ApisHandler) GetLiveGames(w http.ResponseWriter, r *http.Request) {
 
 	result, err := json.Marshal(encoded)
 	if err != nil {
-		errMsg := "Failed to parse live games to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "live games", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(result))
+	return l.HTTPResponseSuccessJSON(result)
 }
 
 //GetConfig retrieves the configs
