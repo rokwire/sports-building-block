@@ -39,7 +39,7 @@ func (app *Application) GetSports(l *logs.Log, orgID string) ([]model.SportsDefi
 }
 
 // GetNews retrieves sport news
-func (app *Application) GetNews(id *string, sports []string, limit int) ([]model.News, error) {
+func (app *Application) GetNews(id *string, sports []string, limit int, orgID string) ([]model.News, error) {
 	return app.provider.GetNews(id, sports, limit)
 }
 
