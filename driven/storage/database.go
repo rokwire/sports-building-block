@@ -36,7 +36,6 @@ type database struct {
 	dbClient *mongo.Client
 
 	sportDefinitions *collectionWrapper
-	sportSocial      *collectionWrapper
 
 	listeners []Listener
 }
@@ -70,18 +69,11 @@ func (m *database) start() error {
 		return err
 	}
 
-	sportSocial := &collectionWrapper{database: m, coll: db.Collection("sport-social")}
-	err = m.applySportSocialChecks(sportSocial)
-	if err != nil {
-		return err
-	}
-
 	//asign the db, db client and the collections
 	m.db = db
 	m.dbClient = client
 
 	m.sportDefinitions = sportDefinitions
-	m.sportSocial = sportSocial
 
 	return nil
 }
@@ -96,18 +88,5 @@ func (m *database) applySportDefinitionsChecks(sportDefinitions *collectionWrapp
 	}
 
 	m.logger.Info("accounts sport definitions passed")
-	return nil
-}
-
-func (m *database) applySportSocialChecks(sportSocial *collectionWrapper) error {
-	m.logger.Info("apply sport social checks.....")
-
-	//add org id index
-	err := sportSocial.AddIndex(bson.D{primitive.E{Key: "org_id", Value: 1}}, false, false)
-	if err != nil {
-		return err
-	}
-
-	m.logger.Info("accounts sport social passed")
 	return nil
 }
