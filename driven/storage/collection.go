@@ -167,6 +167,19 @@ func (collWrapper *collectionWrapper) InsertManyWithContext(ctx context.Context,
 	return result, nil
 }
 
+func (collWrapper *collectionWrapper) InsertManyWithContextTimeout(ctx context.Context, documents []interface{},
+	opts *options.InsertManyOptions, timeout time.Duration) (*mongo.InsertManyResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	result, err := collWrapper.coll.InsertMany(ctx, documents, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func (collWrapper *collectionWrapper) DeleteMany(filter interface{}, opts *options.DeleteOptions) (*mongo.DeleteResult, error) {
 	return collWrapper.DeleteManyWithParams(context.Background(), filter, opts, nil)
 }
