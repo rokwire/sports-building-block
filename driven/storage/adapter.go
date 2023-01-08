@@ -15,6 +15,7 @@
 package storage
 
 import (
+	"log"
 	"sport/core/model"
 	"strconv"
 	"time"
@@ -23,7 +24,7 @@ import (
 	"github.com/rokwire/logging-library-go/v2/logs"
 	"github.com/rokwire/logging-library-go/v2/logutils"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Adapter implements the Storage interface
@@ -54,9 +55,7 @@ func (sa *Adapter) RegisterStorageListener(storageListener Listener) {
 
 // GetSportsDefinitions retrieves sport definitions
 func (sa *Adapter) GetSportsDefinitions(l *logs.Log, orgID string) ([]model.SportsDefinitions, error) {
-	filter := bson.D{
-		primitive.E{Key: "org_id", Value: orgID},
-	}
+	filter := bson.D{}
 	var sports []model.SportsDefinitions
 	err := sa.db.sportDefinitions.Find(filter, &sports, nil)
 	if err != nil {
@@ -84,4 +83,11 @@ type storageListener struct {
 
 // Listener represents storage listener
 type Listener interface {
+}
+
+func abortTransaction(sessionContext mongo.SessionContext) {
+	err := sessionContext.AbortTransaction(sessionContext)
+	if err != nil {
+		log.Printf("error on aborting a transaction - %s", err)
+	}
 }
