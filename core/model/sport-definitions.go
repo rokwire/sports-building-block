@@ -16,17 +16,17 @@ package model
 
 // SportsDefinitions
 type SportsDefinitions struct {
-	OrgID             string `json:"org_id"`
-	ShortName         string `json:"shortName"`
-	Name              string `json:"name"`
-	CustomName        string `json:"custon_name"`
-	HasPosition       bool   `json:"hasPosition"`
-	HasHeight         bool   `json:"hasHeight"`
-	HasWeight         bool   `json:"hasWeight"`
-	HasSortByPosition bool   `json:"hasSortByPosition"`
-	HasSortByNumber   bool   `json:"hasSortByNumber"`
-	HasScores         bool   `json:"hasScores"`
-	Gender            string `json:"gender"`
-	Ticketed          bool   `json:"ticketed"`
-	Icon              string `json:"icon"`
+	OrgID             string `json:"org_id" bson:"org_id"`
+	ShortName         string `json:"shortName" bson:"shortName"`
+	Name              string `json:"name" bson:"name"`
+	CustomName        string `json:"custom_name" bson:"custom_name"`
+	HasPosition       bool   `json:"hasPosition" bson:"hasPosition"`
+	HasHeight         bool   `json:"hasHeight" bson:"hasHeight"`
+	HasWeight         bool   `json:"hasWeight" bson:"hasWeight"`
+	HasSortByPosition bool   `json:"hasSortByPosition" bson:"hasSortByPosition"`
+	HasSortByNumber   bool   `json:"hasSortByNumber" bson:"hasSortByNumber"`
+	HasScores         bool   `json:"hasScores" bson:"hasScores"`
+	Gender            string `json:"gender" bson:"gender"`
+	Ticketed          bool   `json:"ticketed" bson:"ticketed"`
+	Icon              string `json:"icon" bson:"icon"`
 }
