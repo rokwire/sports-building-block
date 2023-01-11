@@ -23,6 +23,10 @@ import (
 	"regexp"
 	"sport/core"
 	"strconv"
+
+	"github.com/rokwire/core-auth-library-go/v2/tokenauth"
+	"github.com/rokwire/logging-library-go/v2/logs"
+	"github.com/rokwire/logging-library-go/v2/logutils"
 )
 
 // ApisHandler structure
@@ -37,281 +41,194 @@ func (a *ApisHandler) GetVersion(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetSports retrieves sport definitions
-func (a *ApisHandler) GetSports(w http.ResponseWriter, r *http.Request) {
-	sportDefinitions := a.app.GetSports()
-	if sportDefinitions == "" {
-		http.Error(w, "Failed to retrieve sports.", http.StatusInternalServerError)
-		return
+func (a *ApisHandler) GetSports(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
+	sportDefinitions, err := a.app.GetSports(l, claims.OrgID)
+	if err != nil {
+		return l.HTTPResponseErrorAction(logutils.ActionGet, "sport-definitions", nil, err, http.StatusInternalServerError, true)
 	}
 
-	successfulResponse(w, []byte(sportDefinitions))
+	data, err := json.Marshal(sportDefinitions)
+	if err != nil {
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "sport-definitions", nil, err, http.StatusInternalServerError, false)
+	}
+	return l.HTTPResponseSuccessJSON(data)
 }
 
 // GetNews retrieves sport news
-func (a *ApisHandler) GetNews(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetNews(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	id, err := parseID(r)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error id value", "news", nil, err, http.StatusInternalServerError, true)
 	}
 
 	sports := r.URL.Query()["sport"]
 	limit, el := parseLimit(r)
 	if el != nil {
 		log.Println(el.Error())
-		http.Error(w, el.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "news", nil, err, http.StatusInternalServerError, true)
 	}
 
-	news, err := a.app.GetNews(id, sports, limit)
+	news, err := a.app.GetNews(id, sports, limit, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve news. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(news) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve news. Reason: %s", "news", nil, err, http.StatusInternalServerError, true)
 	}
 
 	newsJSON, err := json.Marshal(news)
 	if err != nil {
-		errMsg := "Failed to parse news to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "news", nil, err, http.StatusInternalServerError, false)
+
 	}
 
-	successfulResponse(w, []byte(newsJSON))
+	return l.HTTPResponseSuccessJSON(newsJSON)
 }
 
 // GetCoaches retrieves coaches for a team/sport
-func (a *ApisHandler) GetCoaches(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetCoaches(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	sport, err := parseSport(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "coaches", nil, err, http.StatusInternalServerError, true)
 	}
 
-	coaches, err := a.app.GetCoaches(*sport)
+	coaches, err := a.app.GetCoaches(*sport, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve coaches. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(coaches) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve coaches. Reason: %s", "coaches", nil, err, http.StatusInternalServerError, true)
 	}
 
 	coachesJSON, err := json.Marshal(coaches)
 	if err != nil {
-		errMsg := "Failed to parse coaches to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "coaches", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(coachesJSON))
+	return l.HTTPResponseSuccessJSON(coachesJSON)
 }
 
 // GetPlayers retrieves players for a team/sport
-func (a *ApisHandler) GetPlayers(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetPlayers(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	sport, err := parseSport(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "players", nil, err, http.StatusInternalServerError, true)
 	}
 
-	players, err := a.app.GetPlayers(*sport)
+	players, err := a.app.GetPlayers(*sport, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve players. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(players) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve players. Reason: %s", "players", nil, err, http.StatusInternalServerError, true)
 	}
 
 	playersJSON, err := json.Marshal(players)
 	if err != nil {
-		errMsg := "Failed to parse players to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "players", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(playersJSON))
+	return l.HTTPResponseSuccessJSON(playersJSON)
 }
 
 // GetSocialNetworks retrieves social networks
-func (a *ApisHandler) GetSocialNetworks(w http.ResponseWriter, r *http.Request) {
-	socNets, err := a.app.GetSocialNetworks()
+func (a *ApisHandler) GetSocialNetworks(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
+	socNets, err := a.app.GetSocialNetworks(claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve sport social networks. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(socNets) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve sport social networks. Reason: %s", "social networks", nil, err, http.StatusInternalServerError, true)
 	}
 
 	socNetsJSON, err := json.Marshal(socNets)
 	if err != nil {
-		errMsg := "Failed to parse social networks to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "social networks", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(socNetsJSON))
+	return l.HTTPResponseSuccessJSON(socNetsJSON)
 }
 
 // GetGames retrieves games
-func (a *ApisHandler) GetGames(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetGames(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	sports := r.URL.Query()["sport"]
 	id, err := parseID(r)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "games", nil, err, http.StatusInternalServerError, true)
 	}
 
 	startDate, err := parseDate("start", r)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error start date value", "games", nil, err, http.StatusInternalServerError, true)
 	}
 
 	endDate, err := parseDate("end", r)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error end date value", "games", nil, err, http.StatusInternalServerError, true)
 	}
 
 	limit, err := parseLimit(r)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error limit value", "games", nil, err, http.StatusInternalServerError, true)
 	}
 
-	games, err := a.app.GetGames(sports, id, startDate, endDate, limit)
+	games, err := a.app.GetGames(sports, id, startDate, endDate, limit, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve games. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(games) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve games. Reason: %s", "games", nil, err, http.StatusInternalServerError, true)
 	}
 
 	gamesJSON, err := json.Marshal(games)
 	if err != nil {
-		errMsg := "Failed to parse games to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "games", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(gamesJSON))
+	return l.HTTPResponseSuccessJSON(gamesJSON)
 }
 
 // GetTeamSchedule retrieves schedule for a team/sport
-func (a *ApisHandler) GetTeamSchedule(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetTeamSchedule(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	sport, err := parseSport(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "team schedule", nil, err, http.StatusInternalServerError, true)
 	}
 
 	year, err := parseYear(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction("error year value", "team schedule", nil, err, http.StatusInternalServerError, true)
 	}
 
-	schedule, err := a.app.GetTeamSchedule(*sport, year)
+	schedule, err := a.app.GetTeamSchedule(*sport, year, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve team schedule. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve shedule. Reason: %s", "team schedule", nil, err, http.StatusInternalServerError, true)
 	}
 
 	scheduleJSON, err := json.Marshal(schedule)
 	if err != nil {
-		errMsg := "Failed to parse schedule to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "team schedule", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(scheduleJSON))
+	return l.HTTPResponseSuccessJSON(scheduleJSON)
 }
 
 // GetTeamRecord retrieves schedule for a team/sport
-func (a *ApisHandler) GetTeamRecord(w http.ResponseWriter, r *http.Request) {
+func (a *ApisHandler) GetTeamRecord(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	sport, err := parseSport(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return l.HTTPResponseErrorAction("error sport value", "team record", nil, err, http.StatusInternalServerError, true)
 	}
 
 	year, err := parseYear(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction("error year value", "team record", nil, err, http.StatusInternalServerError, true)
 	}
 
-	record, err := a.app.GetTeamRecord(*sport, year)
+	record, err := a.app.GetTeamRecord(*sport, year, claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve team record. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve team record. Reason: %s", "team record", nil, err, http.StatusInternalServerError, true)
 	}
 
 	recordJSON, err := json.Marshal(record)
 	if err != nil {
-		errMsg := "Failed to parse record to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "team record", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(recordJSON))
+	return l.HTTPResponseSuccessJSON(recordJSON)
 }
 
 // GetLiveGames retrieves current live games
-func (a *ApisHandler) GetLiveGames(w http.ResponseWriter, r *http.Request) {
-	liveGames, err := a.app.GetLiveGames()
+func (a *ApisHandler) GetLiveGames(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
+	liveGames, err := a.app.GetLiveGames(claims.OrgID)
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to retrieve live games. Reason: %s", err.Error())
-		log.Println(errMsg)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
-	if len(liveGames) == 0 {
-		successfulResponse(w, []byte("[]"))
-		return
+		return l.HTTPResponseErrorAction("Failed to retrieve live games. Reason: %s", "live games", nil, err, http.StatusInternalServerError, true)
 	}
 
 	var encoded []map[string]string
@@ -322,13 +239,10 @@ func (a *ApisHandler) GetLiveGames(w http.ResponseWriter, r *http.Request) {
 
 	result, err := json.Marshal(encoded)
 	if err != nil {
-		errMsg := "Failed to parse live games to json."
-		log.Printf("%s Reason: %s", errMsg, err.Error())
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, "live games", nil, err, http.StatusInternalServerError, false)
 	}
 
-	successfulResponse(w, []byte(result))
+	return l.HTTPResponseSuccessJSON(result)
 }
 
 //GetConfig retrieves the configs

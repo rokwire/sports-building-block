@@ -17,7 +17,11 @@ package main
 import (
 	"log"
 	"os"
+	"sport/driven/storage"
 	"sport/driver/web"
+
+	"github.com/rokwire/core-auth-library-go/v2/envloader"
+	"github.com/rokwire/logging-library-go/v2/logs"
 )
 
 var (
@@ -50,8 +54,26 @@ func main() {
 	appID := getEnvKey("SPORTS_APP_ID")
 	orgID := getEnvKey("SPORTS_ORG_ID")
 
+	//NewStorageAdapter
+	serviceID := "sports"
+
+	loggerOpts := logs.LoggerOpts{SuppressRequests: logs.NewStandardHealthCheckHTTPRequestProperties(serviceID + "/version")}
+	logger := logs.NewLogger(serviceID, &loggerOpts)
+	envLoader := envloader.NewEnvLoader(Version, logger)
+
+	// mongoDB adapter
+	mongoDBAuth := envLoader.GetAndLogEnvVar("SPORTS_MONGO_AUTH", true, true)
+	mongoDBName := envLoader.GetAndLogEnvVar("SPORTS_MONGO_DATABASE", true, false)
+	mongoTimeout := envLoader.GetAndLogEnvVar("SPORTS_MONGO_TIMEOUT", false, false)
+
+	storageAdapter := storage.NewStorageAdapter(mongoDBAuth, mongoDBName, mongoTimeout, logger)
+	err := storageAdapter.Start()
+	if err != nil {
+		logger.Fatalf("Cannot start the mongoDB adapter: %v", err)
+	}
+	//NewApplication
 	// web adapter
-	webAdapter := web.NewWebAdapter(Version, port, appID, orgID, ssInternalAPIKey, ssHost, coreURL, ftpHost, ftpUser, ftpPassword)
+	webAdapter := web.NewWebAdapter(Version, port, appID, orgID, ssInternalAPIKey, ssHost, coreURL, ftpHost, ftpUser, ftpPassword, storageAdapter)
 	webAdapter.Start()
 	///////////////////////////////////
 }

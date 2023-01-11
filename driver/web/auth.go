@@ -70,7 +70,6 @@ func (a auth) coreAuthCheck(w http.ResponseWriter, r *http.Request) error {
 		log.Printf("auth -> coreAuthCheck: FAILED to validate token: %s", err.Error())
 		return err
 	}
-
 	return nil
 }
 
@@ -92,4 +91,15 @@ func (a auth) corePermissionAuthCheck(w http.ResponseWriter, r *http.Request) er
 	}
 
 	return nil
+}
+
+func (a auth) claimsCheck(w http.ResponseWriter, r *http.Request) (*tokenauth.Claims, error) {
+
+	claims, err := a.tokenAuth.CheckRequestTokens(r)
+	if err != nil {
+		log.Printf("token claims are nil", err.Error())
+		return nil, err
+	}
+
+	return claims, err
 }
