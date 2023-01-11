@@ -22,9 +22,7 @@ import (
 	"sport/core/model"
 	"time"
 
-	"github.com/rokwire/logging-library-go/v2/errors"
 	"github.com/rokwire/logging-library-go/v2/logs"
-	"github.com/rokwire/logging-library-go/v2/logutils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -95,52 +93,18 @@ func (m *database) start() error {
 func (m *database) setSportDefinitionsData(client *mongo.Client,
 	sportDefinitions *collectionWrapper) error {
 
-	for {
-		//get sportDefinition bite
-		sdJSON, err := m.getSportDefinitionsBite(client, sportDefinitions, 19)
-		if err != nil {
-			m.logger.Errorf("error on getting messages bite - %s", err)
-			return err
-		}
-
-		sdCount := len(sdJSON)
-		if sdCount == 0 {
-			m.logger.Info("no more sports data for migrating")
-			break
-		} else {
-			m.logger.Infof("we have %d sports data for migrating", sdCount)
-			err = m.processSdJSON(client, sportDefinitions, sdJSON)
-			if err != nil {
-				m.logger.Errorf("error on process sport-definitions - %s", err)
-				return err
-			}
-			break
-
-		}
-
+	//get sportDefinition data
+	_, err := m.getSportDefinitions(client, sportDefinitions, 19)
+	if err != nil {
+		m.logger.Errorf("error migraiting sport definitions data - %s", err)
+		return err
 	}
+
 	m.logger.Info("setSportDefinitionsData finished")
 	return nil
 }
 
-// process messages bite
-func (m *database) processSdJSON(client *mongo.Client, sportDefinition *collectionWrapper, sDef []model.SportsDefinitions) error {
-
-	sport := make([]interface{}, len(sDef))
-	for i, sd := range sDef {
-		sport[i] = sd
-	}
-
-	_, err := sportDefinition.InsertMany(sport, nil)
-
-	if err != nil {
-		return errors.WrapErrorAction(logutils.ActionInsert, "", nil, err)
-
-	}
-	return nil
-}
-
-func (m *database) getSportDefinitionsBite(client *mongo.Client, sportDefinition *collectionWrapper, count int) ([]model.SportsDefinitions, error) {
+func (m *database) getSportDefinitions(client *mongo.Client, sportDefinition *collectionWrapper, count int) ([]model.SportsDefinitions, error) {
 	fileBytes, err := ioutil.ReadFile("driven/storage/sport-definitions.json")
 	if err != nil {
 		log.Printf("Failed to read sport-definitions.json file. Reason: %s", err.Error())
@@ -150,7 +114,25 @@ func (m *database) getSportDefinitionsBite(client *mongo.Client, sportDefinition
 	var sdef []model.SportsDefinitions
 	err = json.Unmarshal([]byte(fileBytes), &sdef)
 
-	return sdef, nil
+	err = m.sportDefinitions.Find(nil, &sdef, nil)
+	if err != nil {
+		return nil, nil
+	}
+	sDCount := len(sdef)
+	if sDCount == 0 {
+		var insertSportDef []model.SportsDefinitions
+		err = json.Unmarshal([]byte(fileBytes), &insertSportDef)
+		sport := make([]interface{}, len(insertSportDef))
+		for i, sd := range insertSportDef {
+			sport[i] = sd
+		}
+		_, err = sportDefinition.InsertMany(sport, nil)
+	} else {
+		log.Printf("Sport definitions data is already migrated")
+		return nil, nil
+	}
+
+	return nil, nil
 }
 
 func (m *database) applySportDefinitionsChecks(sportDefinitions *collectionWrapper) error {
