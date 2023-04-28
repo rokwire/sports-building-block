@@ -365,7 +365,6 @@ func getSchedule(s sidearmModel.Season) (*sidearmModel.Schedule, error) {
 		return nil, fmt.Errorf("sidearm -> getSchedule: there is no schedule url for season [%s]", s.Year)
 	}
 
-	scheduleURL += "&format=json"
 	scheduleBodyBytes, err := request(http.MethodGet, scheduleURL, nil)
 	if err != nil {
 		errMsg := fmt.Sprintf("sidearm -> getSchedule: Failed to load team schedule. Reason: %s", err.Error())
