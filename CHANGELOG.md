@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.2] - 2022-11-17
 ### Added
-Set appID and orgID for notifications [#8](https://github.com/rokwire/sports-building-block/issues/8)
+- Set appID and orgID for notifications [#8](https://github.com/rokwire/sports-building-block/issues/8)
 
 ## [2.0.1] - 2022-07-15
 ### Added
