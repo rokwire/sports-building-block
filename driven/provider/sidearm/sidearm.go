@@ -365,10 +365,9 @@ func getSchedule(s sidearmModel.Season) (*sidearmModel.Schedule, error) {
 		return nil, fmt.Errorf("sidearm -> getSchedule: there is no schedule url for season [%s]", s.Year)
 	}
 
-	scheduleURL += "&format=json"
 	scheduleBodyBytes, err := request(http.MethodGet, scheduleURL, nil)
 	if err != nil {
-		errMsg := fmt.Sprintf("sidearm -> getSchedule: Failed to load team schedule. Reason: %s", err.Error())
+		errMsg := fmt.Sprintf("sidearm -> getSchedule: failed to load team schedule. Reason: %s", err.Error())
 		log.Print(errMsg)
 		return nil, err
 	}
@@ -376,7 +375,7 @@ func getSchedule(s sidearmModel.Season) (*sidearmModel.Schedule, error) {
 	var sch sidearmModel.Schedule
 	err = json.Unmarshal(scheduleBodyBytes, &sch)
 	if err != nil {
-		log.Printf("sidearm -> getSchedule: Failed to unmarshal schedule response json. Reason: %s", err.Error())
+		log.Printf("sidearm -> getSchedule: failed to unmarshal schedule response json. Reason: %s", err.Error())
 		return nil, err
 	}
 	return &sch, nil
