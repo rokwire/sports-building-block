@@ -6,8 +6,8 @@ Patches for **Sports Building Block** in this repository will only be applied to
 
 | Version | Supported |
 | ------- | ------------------ |
-| 2.0.2 | :white_check_mark: |
-| < 2.0.2 | :x: |
+| 2.0.3 | :white_check_mark: |
+| < 2.0.3 | :x: |
 
 ## Reporting a Bug or Vulnerability
 
