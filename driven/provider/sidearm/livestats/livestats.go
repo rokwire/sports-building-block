@@ -197,7 +197,7 @@ func (stats *livestats) notifyGameChanged(game model.LiveGame) {
 	}
 }
 
-//build notification using configuration and send
+// build notification using configuration and send
 func (stats *livestats) notifyGameStateChanged(game model.LiveGame, item *sidearmModel.LiveGameItem, started bool) {
 	homeTeam, visitingTeam := stats.getTeamNames(*item)
 	configGameMessages := stats.config.NotificationConfig.Messages

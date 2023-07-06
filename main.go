@@ -18,6 +18,8 @@ import (
 	"log"
 	"os"
 	"sport/driver/web"
+
+	"github.com/rokwire/logging-library-go/v2/logs"
 )
 
 var (
@@ -29,6 +31,12 @@ func main() {
 	if len(Version) == 0 {
 		Version = "dev"
 	}
+
+	serviceID := "sports"
+	loggerOpts := logs.LoggerOpts{
+		SuppressRequests: logs.NewStandardHealthCheckHTTPRequestProperties(serviceID + "/version"),
+	}
+	logger := logs.NewLogger(serviceID, &loggerOpts)
 
 	log.Printf("Version=%s", Version)
 
@@ -44,14 +52,17 @@ func main() {
 	ssHost := getEnvKey("SS_HOST")
 	coreURL := getEnvKey("SS_CORE_BB_URL")
 
-	port := "80"
+	port := getEnvKey("PORT")
+	if len(port) == 0 {
+		port = "80"
+	}
 
 	///////////////////////////////////
 	appID := getEnvKey("SPORTS_APP_ID")
 	orgID := getEnvKey("SPORTS_ORG_ID")
 
 	// web adapter
-	webAdapter := web.NewWebAdapter(Version, port, appID, orgID, ssInternalAPIKey, ssHost, coreURL, ftpHost, ftpUser, ftpPassword)
+	webAdapter := web.NewWebAdapter(Version, port, appID, orgID, ssInternalAPIKey, ssHost, coreURL, ftpHost, ftpUser, ftpPassword, logger)
 	webAdapter.Start()
 	///////////////////////////////////
 }

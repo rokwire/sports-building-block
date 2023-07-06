@@ -1,0 +1,16 @@
+{
+    "app_secret": {
+        
+    },
+    "app_config":{
+        "PORT": "5000",
+        "XML_FEED_FTP_HOST": "<xml feed ftp host>",
+        "XML_FEED_FTP_USER": "<xml feed ftp user>",
+        "XML_FEED_FTP_PASSWORD": "<xml feed ftp password>",
+        "SS_INTERNAL_API_KEY": "<ss internal api key>",
+        "SS_HOST": "<ss host>",
+        "SS_CORE_BB_URL": "<ss core bb url>",
+        "SPORTS_APP_ID": "<app id>",
+        "SPORTS_ORG_ID": "<org id>"
+    }
+}

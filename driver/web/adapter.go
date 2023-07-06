@@ -16,11 +16,11 @@ package web
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
+	"github.com/rokwire/logging-library-go/v2/logs"
 	"log"
 	"net/http"
 	"sport/core"
-
-	"github.com/gorilla/mux"
 )
 
 // Adapter structure
@@ -28,6 +28,8 @@ type Adapter struct {
 	port string
 	apis *ApisHandler
 	auth *auth
+
+	logger *logs.Logger
 }
 
 // Start adapter
@@ -65,7 +67,8 @@ func (we Adapter) Start() {
 
 func (we Adapter) coreWrapFunc(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		logRequest(r)
+		logObj := we.logger.NewRequestLog(r)
+		logObj.RequestReceived()
 
 		err := we.auth.coreAuthCheck(w, r)
 
@@ -76,12 +79,14 @@ func (we Adapter) coreWrapFunc(handler http.HandlerFunc) http.HandlerFunc {
 		}
 
 		handler(w, r)
+		logObj.RequestComplete()
 	}
 }
 
 func (we Adapter) corePermissionWrapFunc(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		logRequest(r)
+		logObj := we.logger.NewRequestLog(r)
+		logObj.RequestReceived()
 
 		err := we.auth.corePermissionAuthCheck(w, r)
 
@@ -92,6 +97,7 @@ func (we Adapter) corePermissionWrapFunc(handler http.HandlerFunc) http.HandlerF
 		}
 
 		handler(w, r)
+		logObj.RequestComplete()
 	}
 }
 
@@ -123,9 +129,9 @@ func logRequest(req *http.Request) {
 }
 
 // NewWebAdapter creates new instance
-func NewWebAdapter(version string, port string, appID string, orgID string, internalAPIKey string, host string, coreURL string, ftpHost string, ftpUser string, ftpPassword string) Adapter {
+func NewWebAdapter(version string, port string, appID string, orgID string, internalAPIKey string, host string, coreURL string, ftpHost string, ftpUser string, ftpPassword string, logger *logs.Logger) Adapter {
 	app := core.NewApplication(version, internalAPIKey, appID, orgID, host, ftpHost, ftpUser, ftpPassword)
 	apis := NewApisHandler(app)
 	auth := newAuth(host, coreURL)
-	return Adapter{port: port, apis: apis, auth: auth}
+	return Adapter{port: port, apis: apis, auth: auth, logger: logger}
 }
