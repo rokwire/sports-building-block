@@ -17,12 +17,15 @@ The following Environment variables are supported. The service will not start un
 
 Name|Format|Required|Description
 ---|---|---|---
+PORT | < int > | yes | Port where this application is exposed
 XML_FEED_FTP_HOST | < url > | yes | The FTP server's host for the XML feed
 XML_FEED_FTP_USER | < string > | yes | The user for the FRP server of the XML feed
 XML_FEED_FTP_PASSWORD | < string > | yes | The user's password for the FTP server of the XML feed
 SS_INTERNAL_API_KEY | < string > | yes | The API-KEY for internal communication with the Notifications BB
 SS_HOST | < url > | yes | Host for the Rokwire services
 SS_CORE_BB_URL | < url > | yes | The base URL for the Core BB
+SPORTS_APP_ID | < string > | yes | Application ID for Sports BB
+SPORTS_ORG_ID | < string > | yes | Organization ID for Sports BB
 
 #### Run locally without Docker
 
