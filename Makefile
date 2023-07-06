@@ -15,6 +15,7 @@ BUILD_NUMBER=$(shell echo $$(( $(BUILD_VERSION) + $(CODE_OFFSET) )))
 VERSION ?= ${MAJOR_VERSION}.${MINOR_VERSION}.${BUILD_NUMBER}
 
 export -n GOBIN
+#export PATH=$(BIN): $(shell printenv PATH)
 
 GO      = go
 GODOC   = godoc
@@ -44,11 +45,11 @@ $(BIN):
 	
 $(BIN)/%: | $(BIN) $(BASE) ; $(info $(M) building $(REPOSITORY)…)
 	$Q tmp=$$(mktemp -d); \
-		(cd $(tmp) && GOPATH=$$tmp $(GO) get $(REPOSITORY) && cp $$tmp/bin/* $(BIN)/.) || ret=$$?; \
+		(cd $(tmp) && GOPATH=$$tmp $(GO) install $(REPOSITORY) && cp $$tmp/bin/* $(BIN)/.) || ret=$$?; \
 		rm -rf $$tmp ; exit $$ret
 
 GOLINT = $(BIN)/golint
-$(GOLINT): REPOSITORY=golang.org/x/lint/golint
+$(GOLINT): REPOSITORY=golang.org/x/lint/golint@latest
 
 # Tests
 
@@ -112,6 +113,10 @@ version:
 .PHONY: vendor
 vendor:
 	$(GO) mod vendor
+
+.PHONY: swagger
+swagger: ;
+	swag init -g driver/web/adapter.go
 
 .PHONY: log-variables
 log-variables: ; $(info $(M) Log info…) @ ## Log the variables values
