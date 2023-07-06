@@ -331,7 +331,7 @@ func (a *ApisHandler) GetLiveGames(w http.ResponseWriter, r *http.Request) {
 	successfulResponse(w, []byte(result))
 }
 
-//GetConfig retrieves the configs
+// GetConfig retrieves the configs
 func (a *ApisHandler) GetConfig(w http.ResponseWriter, r *http.Request) {
 	config, err := a.app.GetConfig()
 	if err != nil {
@@ -352,7 +352,7 @@ func (a *ApisHandler) GetConfig(w http.ResponseWriter, r *http.Request) {
 	successfulResponse(w, []byte(result))
 }
 
-//UpdateConfig updates the configs
+// UpdateConfig updates the configs
 func (a *ApisHandler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
 	cfgBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
