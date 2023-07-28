@@ -93,3 +93,27 @@ func (a auth) corePermissionAuthCheck(w http.ResponseWriter, r *http.Request) er
 
 	return nil
 }
+
+func (a auth) coreBbAuthCheck(w http.ResponseWriter, r *http.Request) error {
+	if a.tokenAuth == nil {
+		log.Printf("auth -> coreBbAuthCheck: tokenAuth is nil")
+		return fmt.Errorf("auth Service is not initialized")
+	}
+	claims, err := a.tokenAuth.CheckRequestTokens(r)
+	if err != nil {
+		log.Printf("auth -> coreBbAuthCheck: FAILED to validate token: %s", err.Error())
+		return err
+	}
+
+	if !claims.Service {
+		log.Print("auth -> coreBbAuthCheck: claims is not a service")
+		return fmt.Errorf("request claims is not a service")
+	}
+
+	if !claims.FirstParty {
+		log.Print("auth -> coreBbAuthCheck: claims is not first party")
+		return fmt.Errorf("request claims is not first party")
+	}
+
+	return nil
+}
