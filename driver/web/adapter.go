@@ -56,6 +56,11 @@ func (we Adapter) Start() {
 	v2SubRouter.HandleFunc("/team-record", we.coreWrapFunc(we.apis.GetTeamRecord)).Methods("GET")
 	v2SubRouter.HandleFunc("/live-games", we.coreWrapFunc(we.apis.GetLiveGames)).Methods("GET")
 	//////////////////////////////////////////////////
+	/// BBs APIs
+	bbsSubRouter := apiSubRouter.PathPrefix("/bbs").Subrouter()
+	bbsSubRouter.HandleFunc("/sports", we.coreBbWrapFunc(we.apis.GetSports)).Methods("GET")
+	bbsSubRouter.HandleFunc("/games", we.coreBbWrapFunc(we.apis.GetGames)).Methods("GET")
+	//////////////////////////////////////////////////
 
 	err := http.ListenAndServe(":"+we.port, router)
 	if err != nil {
@@ -84,6 +89,22 @@ func (we Adapter) corePermissionWrapFunc(handler http.HandlerFunc) http.HandlerF
 		logRequest(r)
 
 		err := we.auth.corePermissionAuthCheck(w, r)
+
+		if err != nil {
+			errMsg := fmt.Sprintf("Unauthorized: %s", err.Error())
+			http.Error(w, errMsg, http.StatusUnauthorized)
+			return
+		}
+
+		handler(w, r)
+	}
+}
+
+func (we Adapter) coreBbWrapFunc(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		logRequest(r)
+
+		err := we.auth.coreBbAuthCheck(w, r)
 
 		if err != nil {
 			errMsg := fmt.Sprintf("Unauthorized: %s", err.Error())
