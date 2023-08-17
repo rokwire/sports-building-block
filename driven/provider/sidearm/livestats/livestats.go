@@ -26,8 +26,6 @@ import (
 	"strconv"
 )
 
-var illinoisTeamName = "Illinois"
-
 // LiveStats service
 type LiveStats interface {
 	UpdateConfig(config source.Config)
@@ -41,12 +39,13 @@ type livestats struct {
 	notifications notifications.Notifications
 	games         sidearmModel.GameItems
 	lsSource      source.Source
+	teamName      string
 }
 
 // New create live stats checker
-func New(notifications notifications.Notifications, config source.Config, ftpHost string, ftpUser string, ftpPassword string) LiveStats {
+func New(notifications notifications.Notifications, config source.Config, ftpHost string, ftpUser string, ftpPassword string, teamName string) LiveStats {
 	lsSource := source.New(config, ftpHost, ftpUser, ftpPassword)
-	return &livestats{config: config, notifications: notifications, lsSource: lsSource}
+	return &livestats{config: config, notifications: notifications, lsSource: lsSource, teamName: teamName}
 }
 
 func (stats *livestats) UpdateConfig(config source.Config) {
@@ -246,7 +245,7 @@ func (stats *livestats) notifyGameStateChanged(game model.LiveGame, item *sidear
 
 func (stats *livestats) getTeamNames(item sidearmModel.LiveGameItem) (string, string) {
 	if item.Home {
-		return illinoisTeamName, item.OpponentName
+		return stats.teamName, item.OpponentName
 	}
-	return item.OpponentName, illinoisTeamName
+	return item.OpponentName, stats.teamName
 }

@@ -33,6 +33,7 @@ import (
 )
 
 const host string = "https://fightingillini.com"
+const illinoisTeamName string = "Illinois"
 
 // Provider implements Provider interface
 type Provider struct {
@@ -50,7 +51,7 @@ type Provider struct {
 func NewProvider(internalAPIKey string, host string, ftpHost string, ftpUser string, ftpPassword string, appID string, orgID string) *Provider {
 	config := source.NewConfig()
 	notifications := notifications.New(internalAPIKey, host, appID, orgID)
-	stats := livestats.New(notifications, config, ftpHost, ftpUser, ftpPassword)
+	stats := livestats.New(notifications, config, ftpHost, ftpUser, ftpPassword, illinoisTeamName)
 	return &Provider{stats: stats, config: config, notifications: notifications}
 }
 
@@ -420,7 +421,8 @@ func buildGames(s sidearmModel.Schedule) []model.Game {
 				}
 			}
 			parkingURL := getParkingURL(s.DisplayField2)
-			games = append(games, model.Game{ID: s.ID, Date: s.Date, DateTimeUtc: s.DateTimeUtc, EndDateTimeUtc: s.EndDateTimeUtc, EndDate: s.EndDateTime, Time: s.Time, AllDay: s.DateInfo.AllDay, Status: s.Status, Description: s.PromotionName, Sport: &sport, Location: &location, ParkingURL: parkingURL, Links: &links, Opponent: &opponent, Results: &results})
+			name := getName(s)
+			games = append(games, model.Game{ID: s.ID, Name: name, Date: s.Date, DateTimeUtc: s.DateTimeUtc, EndDateTimeUtc: s.EndDateTimeUtc, EndDate: s.EndDateTime, Time: s.Time, AllDay: s.DateInfo.AllDay, Status: s.Status, Description: s.PromotionName, Sport: &sport, Location: &location, ParkingURL: parkingURL, Links: &links, Opponent: &opponent, Results: &results})
 		}
 	}
 	return games
@@ -862,4 +864,18 @@ func getLivestats(scheduleItem sidearmModel.Game) string {
 		result = scheduleItem.Links.Livestats
 	}
 	return result
+}
+
+func getName(game sidearmModel.Game) string {
+	var name string
+	var opponentName = getOpponentName(game)
+	if getHome(game) {
+		name = opponentName + " at " + illinoisTeamName
+	} else {
+		name = illinoisTeamName + " at " + opponentName
+	}
+	if game.Status == "C" {
+		name = name + " (Cancelled)"
+	}
+	return name
 }
