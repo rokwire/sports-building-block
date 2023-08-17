@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.6] - 2023-08-17
+### Fixed
+- Source code formatting
+
 ## [2.0.5] - 2023-08-17
 ### Added
 - Exposed "name" field in Game json response [#22](https://github.com/rokwire/sports-building-block/issues/22)
