@@ -77,6 +77,7 @@ type SportSocial struct {
 // Game structure
 type Game struct {
 	ID             string    `json:"id,omitempty"`
+	Name           string    `json:"name,omitempty"`
 	Date           string    `json:"date,omitempty"`
 	DateTimeUtc    string    `json:"datetime_utc,omitempty"`
 	EndDate        string    `json:"end_date,omitempty"`
