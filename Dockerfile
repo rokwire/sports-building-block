@@ -8,10 +8,10 @@ WORKDIR /sp-app
 COPY . .
 RUN make
 
-FROM alpine:3.13
+FROM alpine:3.21.3
 
-#we need timezone database
-RUN apk --no-cache add tzdata
+#we need timezone database + certificates
+RUN apk add --no-cache tzdata ca-certificates
 
 COPY --from=builder /sp-app/bin/sport /
 

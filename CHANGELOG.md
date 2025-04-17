@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Support Google Trust Services as CA [#24](https://github.com/rokwire/sports-building-block/issues/24)
 
 ## [2.0.6] - 2023-08-17
 ### Fixed
