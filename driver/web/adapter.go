@@ -23,6 +23,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const sportsSubRouterKey string = "/sports-service"
+const apiSubRouterKey string = "/api"
+const v2SubRouterKey string = "/v2"
+const proxyAPIKey string = "/proxy"
+
 // Adapter structure
 type Adapter struct {
 	port string
@@ -34,8 +39,8 @@ type Adapter struct {
 func (we Adapter) Start() {
 
 	router := mux.NewRouter().StrictSlash(true)
-	defaultSubRouter := router.PathPrefix("/sports-service").Subrouter()
-	apiSubRouter := defaultSubRouter.PathPrefix("/api").Subrouter()
+	defaultSubRouter := router.PathPrefix(sportsSubRouterKey).Subrouter()
+	apiSubRouter := defaultSubRouter.PathPrefix(apiSubRouterKey).Subrouter()
 
 	//////////////////////////////////////////////////
 	/// General Usage APIs
@@ -43,7 +48,7 @@ func (we Adapter) Start() {
 
 	//////////////////////////////////////////////////
 	/// V2 APIs
-	v2SubRouter := apiSubRouter.PathPrefix("/v2").Subrouter()
+	v2SubRouter := apiSubRouter.PathPrefix(v2SubRouterKey).Subrouter()
 	v2SubRouter.HandleFunc("/config", we.corePermissionWrapFunc(we.apis.GetConfig)).Methods("GET")
 	v2SubRouter.HandleFunc("/config", we.corePermissionWrapFunc(we.apis.UpdateConfig)).Methods("PUT")
 	v2SubRouter.HandleFunc("/sports", we.coreWrapFunc(we.apis.GetSports)).Methods("GET")
@@ -55,6 +60,7 @@ func (we Adapter) Start() {
 	v2SubRouter.HandleFunc("/team-schedule", we.coreWrapFunc(we.apis.GetTeamSchedule)).Methods("GET")
 	v2SubRouter.HandleFunc("/team-record", we.coreWrapFunc(we.apis.GetTeamRecord)).Methods("GET")
 	v2SubRouter.HandleFunc("/live-games", we.coreWrapFunc(we.apis.GetLiveGames)).Methods("GET")
+	v2SubRouter.HandleFunc(proxyAPIKey, we.coreWrapFunc(we.apis.Proxy)).Methods("GET")
 	//////////////////////////////////////////////////
 	/// BBs APIs
 	bbsSubRouter := apiSubRouter.PathPrefix("/bbs").Subrouter()
@@ -72,7 +78,7 @@ func (we Adapter) coreWrapFunc(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logRequest(r)
 
-		err := we.auth.coreAuthCheck(w, r)
+		err := we.auth.coreAuthCheck(r)
 
 		if err != nil {
 			errMsg := fmt.Sprintf("Unauthorized: %s", err.Error())
@@ -88,7 +94,7 @@ func (we Adapter) corePermissionWrapFunc(handler http.HandlerFunc) http.HandlerF
 	return func(w http.ResponseWriter, r *http.Request) {
 		logRequest(r)
 
-		err := we.auth.corePermissionAuthCheck(w, r)
+		err := we.auth.corePermissionAuthCheck(r)
 
 		if err != nil {
 			errMsg := fmt.Sprintf("Unauthorized: %s", err.Error())
@@ -104,7 +110,7 @@ func (we Adapter) coreBbWrapFunc(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logRequest(r)
 
-		err := we.auth.coreBbAuthCheck(w, r)
+		err := we.auth.coreBbAuthCheck(r)
 
 		if err != nil {
 			errMsg := fmt.Sprintf("Unauthorized: %s", err.Error())
@@ -145,7 +151,8 @@ func logRequest(req *http.Request) {
 
 // NewWebAdapter creates new instance
 func NewWebAdapter(version string, port string, appID string, orgID string, internalAPIKey string, host string, coreURL string, ftpHost string, ftpUser string, ftpPassword string) Adapter {
-	app := core.NewApplication(version, internalAPIKey, appID, orgID, host, ftpHost, ftpUser, ftpPassword)
+	proxySubRouter := sportsSubRouterKey + apiSubRouterKey + v2SubRouterKey + proxyAPIKey
+	app := core.NewApplication(version, internalAPIKey, appID, orgID, host, proxySubRouter, ftpHost, ftpUser, ftpPassword)
 	apis := NewApisHandler(app)
 	auth := newAuth(host, coreURL)
 	return Adapter{port: port, apis: apis, auth: auth}

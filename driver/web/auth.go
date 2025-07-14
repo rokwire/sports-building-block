@@ -60,7 +60,7 @@ func newAuth(host string, coreURL string) *auth {
 	return &auth
 }
 
-func (a auth) coreAuthCheck(w http.ResponseWriter, r *http.Request) error {
+func (a auth) coreAuthCheck(r *http.Request) error {
 	if a.tokenAuth == nil {
 		log.Printf("auth -> coreAuthCheck: tokenAuth is nil")
 		return fmt.Errorf("auth Service is not initialized")
@@ -74,7 +74,7 @@ func (a auth) coreAuthCheck(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func (a auth) corePermissionAuthCheck(w http.ResponseWriter, r *http.Request) error {
+func (a auth) corePermissionAuthCheck(r *http.Request) error {
 	if a.tokenAuth == nil {
 		log.Printf("auth -> corePermissionAuthCheck: tokenAuth is nil")
 		return fmt.Errorf("auth Service is not initialized")
@@ -94,7 +94,7 @@ func (a auth) corePermissionAuthCheck(w http.ResponseWriter, r *http.Request) er
 	return nil
 }
 
-func (a auth) coreBbAuthCheck(w http.ResponseWriter, r *http.Request) error {
+func (a auth) coreBbAuthCheck(r *http.Request) error {
 	if a.tokenAuth == nil {
 		log.Printf("auth -> coreBbAuthCheck: tokenAuth is nil")
 		return fmt.Errorf("auth Service is not initialized")

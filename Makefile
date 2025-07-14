@@ -42,13 +42,11 @@ all: vendor log-variables checkfmt lint test-short | $(BASE) ; $(info $(M) build
 $(BIN):
 	@mkdir -p $@
 	
-$(BIN)/%: | $(BIN) $(BASE) ; $(info $(M) building $(REPOSITORY)…)
-	$Q tmp=$$(mktemp -d); \
-		(cd $(tmp) && GOPATH=$$tmp $(GO) get $(REPOSITORY) && cp $$tmp/bin/* $(BIN)/.) || ret=$$?; \
-		rm -rf $$tmp ; exit $$ret
-
 GOLINT = $(BIN)/golint
-$(GOLINT): REPOSITORY=golang.org/x/lint/golint
+
+$(GOLINT): ; $(info $(M) installing golint…) @
+	$Q GOBIN=$(BIN) $(GO) install golang.org/x/lint/golint@latest
+
 
 # Tests
 
