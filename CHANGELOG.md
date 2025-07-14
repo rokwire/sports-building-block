@@ -6,10 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2025-07-14
 ### Added
 - Proxy API for loading images [#27](https://github.com/rokwire/sports-building-block/issues/27)
 
-## [2.1.0] - 2023-06-16
+## [2.1.0] - 2025-06-16
 ### Changed
 - Support Google Trust Services as CA [#24](https://github.com/rokwire/sports-building-block/issues/24)
 
