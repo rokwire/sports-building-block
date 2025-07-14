@@ -17,7 +17,7 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"regexp"
@@ -354,7 +354,7 @@ func (a *ApisHandler) GetConfig(w http.ResponseWriter, r *http.Request) {
 
 // UpdateConfig updates the configs
 func (a *ApisHandler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
-	cfgBytes, err := ioutil.ReadAll(r.Body)
+	cfgBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		errMsg := "failed to read request body"
 		log.Printf("apis -> updateConfig: failed, reason: %s", err.Error())
@@ -425,7 +425,7 @@ func parseSport(r *http.Request) (*string, error) {
 	if (sports == nil) || (len(sports) != 1) {
 		errMsg := "please provide exactly one 'sport' query parameter"
 		log.Println(errMsg)
-		return nil, fmt.Errorf(errMsg)
+		return nil, fmt.Errorf("%s", errMsg)
 	}
 	return &sports[0], nil
 }
@@ -438,13 +438,13 @@ func parseYear(r *http.Request) (*int, error) {
 		if err != nil {
 			errMsg := fmt.Sprintf("Invalid 'year' value [%s]. Please provide valid year number.", year[0])
 			log.Printf("sidearm -> GetTeamSchedule: failed to parse year to int. Error: %s", err.Error())
-			return nil, fmt.Errorf(errMsg)
+			return nil, fmt.Errorf("%s", errMsg)
 		}
 		y = &val
 	} else if len(year) > 1 {
 		errMsg := "please provide zero or one 'year' query parameter"
 		log.Println(errMsg)
-		return nil, fmt.Errorf(errMsg)
+		return nil, fmt.Errorf("%s", errMsg)
 	}
 	return y, nil
 }
