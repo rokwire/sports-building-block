@@ -79,7 +79,7 @@ func (we Adapter) coreWrapFunc(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logRequest(r)
 
-		err := we.auth.coreAuthCheck(w, r)
+		err := we.auth.coreAuthCheck(r)
 
 		if err != nil {
 			errMsg := fmt.Sprintf("Unauthorized: %s", err.Error())
@@ -95,7 +95,7 @@ func (we Adapter) corePermissionWrapFunc(handler http.HandlerFunc) http.HandlerF
 	return func(w http.ResponseWriter, r *http.Request) {
 		logRequest(r)
 
-		err := we.auth.corePermissionAuthCheck(w, r)
+		err := we.auth.corePermissionAuthCheck(r)
 
 		if err != nil {
 			errMsg := fmt.Sprintf("Unauthorized: %s", err.Error())
@@ -111,7 +111,7 @@ func (we Adapter) coreBbWrapFunc(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logRequest(r)
 
-		err := we.auth.coreBbAuthCheck(w, r)
+		err := we.auth.coreBbAuthCheck(r)
 
 		if err != nil {
 			errMsg := fmt.Sprintf("Unauthorized: %s", err.Error())
