@@ -508,7 +508,7 @@ func (p *Provider) buildRosterPhotos(srcPhotos []sidearmModel.Photo) *model.Phot
 }
 
 func request(method, url string, body io.Reader) (responseBytes []byte, err error) {
-	req, err := http.NewRequest(http.MethodGet, url, body)
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
 	}
