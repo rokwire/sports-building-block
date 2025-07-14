@@ -60,8 +60,7 @@ func (we Adapter) Start() {
 	v2SubRouter.HandleFunc("/team-schedule", we.coreWrapFunc(we.apis.GetTeamSchedule)).Methods("GET")
 	v2SubRouter.HandleFunc("/team-record", we.coreWrapFunc(we.apis.GetTeamRecord)).Methods("GET")
 	v2SubRouter.HandleFunc("/live-games", we.coreWrapFunc(we.apis.GetLiveGames)).Methods("GET")
-	//TBD: DD - implement
-	v2SubRouter.HandleFunc(proxyApiKey, we.coreWrapFunc(we.apis.GetLiveGames)).Methods("GET")
+	v2SubRouter.HandleFunc(proxyApiKey, we.coreWrapFunc(we.apis.Proxy)).Methods("GET")
 	//////////////////////////////////////////////////
 	/// BBs APIs
 	bbsSubRouter := apiSubRouter.PathPrefix("/bbs").Subrouter()

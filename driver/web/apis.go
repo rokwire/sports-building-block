@@ -373,6 +373,46 @@ func (a *ApisHandler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
 	successfulResponse(w, []byte("Successfully updated"))
 }
 
+// Proxy handles proxy request - currently GET methods for images
+func (a *ApisHandler) Proxy(w http.ResponseWriter, r *http.Request) {
+	proxyUrls := r.URL.Query()["proxy_url"]
+	urlsCount := len(proxyUrls)
+	if urlsCount != 1 {
+		errMsg := fmt.Sprintf("apis -> Proxy: 'proxy_url' query parameter's number must be 1 - current is [%d]", urlsCount)
+		response(w, http.StatusBadRequest, []byte(errMsg))
+		return
+	}
+
+	proxyUrl := &proxyUrls[0]
+
+	req, err := http.NewRequest(http.MethodGet, *proxyUrl, r.Body)
+	if err != nil {
+		log.Printf("apis -> Proxy: request failed: %s", err.Error())
+		response(w, http.StatusInternalServerError, []byte(err.Error()))
+		return
+	}
+
+	client := &http.Client{Transport: &http.Transport{}}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		log.Printf("apis -> Proxy: response failed: %s", err.Error())
+		response(w, http.StatusInternalServerError, []byte(err.Error()))
+		return
+	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	resp.Body.Close()
+
+	if err != nil {
+		log.Printf("apis -> Proxy: reading body failed: %s", err.Error())
+		response(w, http.StatusInternalServerError, []byte(err.Error()))
+		return
+	}
+
+	response(w, resp.StatusCode, bodyBytes)
+}
+
 func parseID(r *http.Request) (*string, error) {
 	ids := r.URL.Query()["id"]
 	idsCount := len(ids)
@@ -463,8 +503,12 @@ func validateDate(date *string) error {
 }
 
 func successfulResponse(w http.ResponseWriter, responseBytes []byte) {
+	response(w, http.StatusOK, responseBytes)
+}
+
+func response(w http.ResponseWriter, statusCode int, responseBytes []byte) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(statusCode)
 	w.Write(responseBytes)
 }
 
