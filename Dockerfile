@@ -1,6 +1,8 @@
-FROM golang:1.16-buster as builder
+FROM golang:1.23.10-alpine as builder
 
 ENV CGO_ENABLED=0
+
+RUN apk add --no-cache --update make git
 
 RUN mkdir /sp-app
 WORKDIR /sp-app
