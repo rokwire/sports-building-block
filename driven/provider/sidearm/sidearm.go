@@ -45,16 +45,16 @@ type Provider struct {
 	startedGames   []*sidearmModel.LiveGameItem
 	cachedGames    []sidearmModel.Game
 	cachedNews     []model.News
-	imageUrlPrefix string
+	imageURLPrefix string
 }
 
 // NewProvider creates new provider instance
-func NewProvider(internalAPIKey string, proxyApiSubRouter string, host string, ftpHost string, ftpUser string, ftpPassword string, appID string, orgID string) *Provider {
-	imageUrlPrefix := host + proxyApiSubRouter + "?proxy_url=" //append query param
+func NewProvider(internalAPIKey string, proxyAPISubRouter string, host string, ftpHost string, ftpUser string, ftpPassword string, appID string, orgID string) *Provider {
+	imageURLPrefix := host + proxyAPISubRouter + "?proxy_url=" //append query param
 	config := source.NewConfig()
 	notifications := notifications.New(internalAPIKey, host, appID, orgID)
 	stats := livestats.New(notifications, config, ftpHost, ftpUser, ftpPassword, illinoisTeamName)
-	return &Provider{stats: stats, config: config, notifications: notifications, imageUrlPrefix: imageUrlPrefix}
+	return &Provider{stats: stats, config: config, notifications: notifications, imageURLPrefix: imageURLPrefix}
 }
 
 // Start Provider
@@ -405,16 +405,16 @@ func (p *Provider) buildGames(s sidearmModel.Schedule) []model.Game {
 				links = model.Links{Livestats: s.Links.Livestats, Video: s.Links.Video, Audio: s.Links.Audio, Tickets: s.Links.Tickets}
 				var preGame model.GameInfo
 				if s.Links.PreGame != nil {
-					gameStoryImageUrl := fmt.Sprintf("%s%s", p.imageUrlPrefix, s.Links.PreGame.StoryImageURL)
-					preGame = model.GameInfo{ID: s.Links.PreGame.ID, URL: s.Links.PreGame.URL, StoryImageURL: gameStoryImageUrl, Text: s.Links.PreGame.Text}
+					gameStoryImageURL := fmt.Sprintf("%s%s", p.imageURLPrefix, s.Links.PreGame.StoryImageURL)
+					preGame = model.GameInfo{ID: s.Links.PreGame.ID, URL: s.Links.PreGame.URL, StoryImageURL: gameStoryImageURL, Text: s.Links.PreGame.Text}
 					links.PreGame = &preGame
 				}
 			}
 
 			var opponent model.Opponent
 			if s.Opponent != nil {
-				opponentLogoImageUrl := fmt.Sprintf("%s%s", p.imageUrlPrefix, s.Opponent.LogoImage)
-				opponent = model.Opponent{Name: s.Opponent.Name, LogoImage: opponentLogoImageUrl}
+				opponentLogoImageURL := fmt.Sprintf("%s%s", p.imageURLPrefix, s.Opponent.LogoImage)
+				opponent = model.Opponent{Name: s.Opponent.Name, LogoImage: opponentLogoImageURL}
 			}
 
 			var results []model.Result
@@ -493,9 +493,9 @@ func (p *Provider) buildRosterPhotos(srcPhotos []sidearmModel.Photo) *model.Phot
 	var fsURL string
 	var thURL string
 	if srcPhoto.Fullsize != "" {
-		fsURL = fmt.Sprintf("%s%s", p.imageUrlPrefix, srcPhoto.Fullsize)
+		fsURL = fmt.Sprintf("%s%s", p.imageURLPrefix, srcPhoto.Fullsize)
 	} else {
-		thURL = fmt.Sprintf("%s%s", p.imageUrlPrefix, srcPhoto.Roster)
+		thURL = fmt.Sprintf("%s%s", p.imageURLPrefix, srcPhoto.Roster)
 	}
 	var photos model.Photos
 	// Prepare photos with specific url for the client - either use fullsize and resized or use roster photo
@@ -735,7 +735,7 @@ func (p *Provider) loadNews(id *string, sports []string, limit int) ([]model.New
 			s := stories[i]
 			var e = &s.Enclosure
 			var sport = &s.Sport
-			imageURL := fmt.Sprintf("%s%s", p.imageUrlPrefix, e.URL)
+			imageURL := fmt.Sprintf("%s%s", p.imageURLPrefix, e.URL)
 			news = append(news, model.News{ID: s.ID, Title: s.Title, Sport: sport.PrimaryGlobalShortName, Link: s.Link, Category: s.Category, Description: s.Description, FullText: s.FullText, FullTextRaw: s.FullTextRaw, ImageURL: imageURL, PubDateUtc: s.PubDateUtc})
 		}
 	}

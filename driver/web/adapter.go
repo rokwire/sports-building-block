@@ -26,7 +26,7 @@ import (
 const sportsSubRouterKey string = "/sports-service"
 const apiSubRouterKey string = "/api"
 const v2SubRouterKey string = "/v2"
-const proxyApiKey string = "/proxy"
+const proxyAPIKey string = "/proxy"
 
 // Adapter structure
 type Adapter struct {
@@ -60,7 +60,7 @@ func (we Adapter) Start() {
 	v2SubRouter.HandleFunc("/team-schedule", we.coreWrapFunc(we.apis.GetTeamSchedule)).Methods("GET")
 	v2SubRouter.HandleFunc("/team-record", we.coreWrapFunc(we.apis.GetTeamRecord)).Methods("GET")
 	v2SubRouter.HandleFunc("/live-games", we.coreWrapFunc(we.apis.GetLiveGames)).Methods("GET")
-	v2SubRouter.HandleFunc(proxyApiKey, we.coreWrapFunc(we.apis.Proxy)).Methods("GET")
+	v2SubRouter.HandleFunc(proxyAPIKey, we.coreWrapFunc(we.apis.Proxy)).Methods("GET")
 	//////////////////////////////////////////////////
 	/// BBs APIs
 	bbsSubRouter := apiSubRouter.PathPrefix("/bbs").Subrouter()
@@ -151,7 +151,7 @@ func logRequest(req *http.Request) {
 
 // NewWebAdapter creates new instance
 func NewWebAdapter(version string, port string, appID string, orgID string, internalAPIKey string, host string, coreURL string, ftpHost string, ftpUser string, ftpPassword string) Adapter {
-	proxySubRouter := sportsSubRouterKey + apiSubRouterKey + v2SubRouterKey + proxyApiKey
+	proxySubRouter := sportsSubRouterKey + apiSubRouterKey + v2SubRouterKey + proxyAPIKey
 	app := core.NewApplication(version, internalAPIKey, appID, orgID, host, proxySubRouter, ftpHost, ftpUser, ftpPassword)
 	apis := NewApisHandler(app)
 	auth := newAuth(host, coreURL)

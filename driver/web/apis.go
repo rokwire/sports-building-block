@@ -383,9 +383,9 @@ func (a *ApisHandler) Proxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proxyUrl := &proxyUrls[0]
+	proxyURL := &proxyUrls[0]
 
-	req, err := http.NewRequest(http.MethodGet, *proxyUrl, r.Body)
+	req, err := http.NewRequest(http.MethodGet, *proxyURL, r.Body)
 	if err != nil {
 		log.Printf("apis -> Proxy: request failed: %s", err.Error())
 		response(w, http.StatusInternalServerError, []byte(err.Error()))
