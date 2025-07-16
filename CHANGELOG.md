@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Removed
 - Debug logs [#27](https://github.com/rokwire/sports-building-block/issues/27)
+### Fixed
+- Pass correct content-type in the http response [#27](https://github.com/rokwire/sports-building-block/issues/27)
 
 ## [2.1.4] - 2025-07-16
 ### Fixed
