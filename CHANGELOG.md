@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.1.6] - 2025-07-16
 ### Changed
 - Pass all headers in the proxy response plus Content-Length [#27](https://github.com/rokwire/sports-building-block/issues/27)
 
