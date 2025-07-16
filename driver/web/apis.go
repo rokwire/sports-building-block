@@ -33,7 +33,7 @@ type ApisHandler struct {
 // GetVersion retrieves application version
 func (a *ApisHandler) GetVersion(w http.ResponseWriter, r *http.Request) {
 	version := a.app.GetVersion()
-	successfulJsonResponse(w, []byte(version))
+	successfulJSONResponse(w, []byte(version))
 }
 
 // GetSports retrieves sport definitions
@@ -44,7 +44,7 @@ func (a *ApisHandler) GetSports(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulJsonResponse(w, []byte(sportDefinitions))
+	successfulJSONResponse(w, []byte(sportDefinitions))
 }
 
 // GetNews retrieves sport news
@@ -73,7 +73,7 @@ func (a *ApisHandler) GetNews(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(news) == 0 {
-		successfulJsonResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -85,7 +85,7 @@ func (a *ApisHandler) GetNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulJsonResponse(w, []byte(newsJSON))
+	successfulJSONResponse(w, []byte(newsJSON))
 }
 
 // GetCoaches retrieves coaches for a team/sport
@@ -105,7 +105,7 @@ func (a *ApisHandler) GetCoaches(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(coaches) == 0 {
-		successfulJsonResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -117,7 +117,7 @@ func (a *ApisHandler) GetCoaches(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulJsonResponse(w, []byte(coachesJSON))
+	successfulJSONResponse(w, []byte(coachesJSON))
 }
 
 // GetPlayers retrieves players for a team/sport
@@ -137,7 +137,7 @@ func (a *ApisHandler) GetPlayers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(players) == 0 {
-		successfulJsonResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -149,7 +149,7 @@ func (a *ApisHandler) GetPlayers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulJsonResponse(w, []byte(playersJSON))
+	successfulJSONResponse(w, []byte(playersJSON))
 }
 
 // GetSocialNetworks retrieves social networks
@@ -163,7 +163,7 @@ func (a *ApisHandler) GetSocialNetworks(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if len(socNets) == 0 {
-		successfulJsonResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -175,7 +175,7 @@ func (a *ApisHandler) GetSocialNetworks(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	successfulJsonResponse(w, []byte(socNetsJSON))
+	successfulJSONResponse(w, []byte(socNetsJSON))
 }
 
 // GetGames retrieves games
@@ -218,7 +218,7 @@ func (a *ApisHandler) GetGames(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(games) == 0 {
-		successfulJsonResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -230,7 +230,7 @@ func (a *ApisHandler) GetGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulJsonResponse(w, []byte(gamesJSON))
+	successfulJSONResponse(w, []byte(gamesJSON))
 }
 
 // GetTeamSchedule retrieves schedule for a team/sport
@@ -263,7 +263,7 @@ func (a *ApisHandler) GetTeamSchedule(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulJsonResponse(w, []byte(scheduleJSON))
+	successfulJSONResponse(w, []byte(scheduleJSON))
 }
 
 // GetTeamRecord retrieves schedule for a team/sport
@@ -296,7 +296,7 @@ func (a *ApisHandler) GetTeamRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulJsonResponse(w, []byte(recordJSON))
+	successfulJSONResponse(w, []byte(recordJSON))
 }
 
 // GetLiveGames retrieves current live games
@@ -310,7 +310,7 @@ func (a *ApisHandler) GetLiveGames(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(liveGames) == 0 {
-		successfulJsonResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -328,7 +328,7 @@ func (a *ApisHandler) GetLiveGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulJsonResponse(w, []byte(result))
+	successfulJSONResponse(w, []byte(result))
 }
 
 // GetConfig retrieves the configs
@@ -349,7 +349,7 @@ func (a *ApisHandler) GetConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulJsonResponse(w, []byte(result))
+	successfulJSONResponse(w, []byte(result))
 }
 
 // UpdateConfig updates the configs
@@ -370,7 +370,7 @@ func (a *ApisHandler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulJsonResponse(w, []byte("Successfully updated"))
+	successfulJSONResponse(w, []byte("Successfully updated"))
 }
 
 // Proxy handles proxy request - currently GET methods for images
@@ -502,7 +502,7 @@ func validateDate(date *string) error {
 	return fmt.Errorf("provide valid date in format 'MM/dd/yyyy'")
 }
 
-func successfulJsonResponse(w http.ResponseWriter, responseBytes []byte) {
+func successfulJSONResponse(w http.ResponseWriter, responseBytes []byte) {
 	jsonResponse(w, http.StatusOK, responseBytes)
 }
 
