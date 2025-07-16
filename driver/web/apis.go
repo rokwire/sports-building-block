@@ -376,9 +376,7 @@ func (a *ApisHandler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
 // Proxy handles proxy request - currently GET methods for images
 func (a *ApisHandler) Proxy(w http.ResponseWriter, r *http.Request) {
 	proxyUrls := r.URL.Query()["proxy_url"]
-	log.Printf("DEBUGGGG: proxyUrls: %v", proxyUrls)
 	urlsCount := len(proxyUrls)
-	log.Printf("DEBUGGGG: urlsCount: %d", urlsCount)
 	if urlsCount != 1 {
 		errMsg := fmt.Sprintf("apis -> Proxy: 'proxy_url' query parameter's number must be 1 - current is [%d]", urlsCount)
 		response(w, http.StatusBadRequest, []byte(errMsg))
@@ -386,51 +384,33 @@ func (a *ApisHandler) Proxy(w http.ResponseWriter, r *http.Request) {
 	}
 
 	proxyURL := &proxyUrls[0]
-	log.Printf("DEBUGGGG: proxyURL: %s", *proxyURL)
 
 	req, err := http.NewRequest(http.MethodGet, *proxyURL, r.Body)
-	log.Printf("DEBUGGGG: req executed proxyURL: %s", *proxyURL)
 	if err != nil {
-		log.Printf("DEBUGGGG: No req but error proxyURL: %s", *proxyURL)
 		log.Printf("apis -> Proxy: request failed: %s", err.Error())
 		response(w, http.StatusInternalServerError, []byte(err.Error()))
 		return
 	}
-	log.Printf("DEBUGGGG: has req!!! proxyURL: %s", *proxyURL)
-	log.Printf("DEBUGGGG: req.URL: %s proxyURL: %s", req.URL, *proxyURL)
 
-	log.Printf("DEBUGGGG: before instantiating client proxyURL: %s", *proxyURL)
 	client := &http.Client{Transport: &http.Transport{}}
-	log.Printf("DEBUGGGG: before client do proxyURL: %s", *proxyURL)
 	resp, err := client.Do(req)
-	log.Printf("DEBUGGGG: AFTER client do proxyURL: %s", *proxyURL)
 
 	if err != nil {
-		log.Printf("DEBUGGGG: client response has error proxyURL: %s", *proxyURL)
 		log.Printf("apis -> Proxy: response failed: %s", err.Error())
 		response(w, http.StatusInternalServerError, []byte(err.Error()))
 		return
 	}
 
-	log.Printf("DEBUGGGG: client response has NO error proxyURL: %s", *proxyURL)
-	log.Printf("DEBUGGGG: resp.StatusCode: %d", resp.StatusCode)
-	log.Printf("DEBUGGGG: before reading bytes proxyURL: %s", *proxyURL)
 	bodyBytes, err := io.ReadAll(resp.Body)
-	log.Printf("DEBUGGGG: after reading bytes proxyURL: %s", *proxyURL)
 	resp.Body.Close()
-	log.Printf("DEBUGGGG: after response body close proxyURL: %s", *proxyURL)
 
 	if err != nil {
-		log.Printf("DEBUGGGG: reading bytes has err proxyURL: %s", *proxyURL)
 		log.Printf("apis -> Proxy: reading body failed: %s", err.Error())
 		response(w, http.StatusInternalServerError, []byte(err.Error()))
 		return
 	}
 
-	log.Printf("DEBUGGGG: reading bytes has NO err, so returning succesfull response proxyURL: %s", *proxyURL)
-
 	response(w, resp.StatusCode, bodyBytes)
-	log.Printf("DEBUGGGG: At the END resp.StatusCode: %d, proxyURL: %s", resp.StatusCode, *proxyURL)
 }
 
 func parseID(r *http.Request) (*string, error) {
