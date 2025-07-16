@@ -410,7 +410,14 @@ func (a *ApisHandler) Proxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response(w, resp.StatusCode, bodyBytes, resp.Header.Get("Content-Type"))
+	headerMap := make(map[string]string)
+	for key, value := range resp.Header {
+		if len(value) > 0 {
+			headerMap[key] = value[0]
+		}
+	}
+
+	response(w, resp.StatusCode, bodyBytes, headerMap)
 }
 
 func parseID(r *http.Request) (*string, error) {
@@ -507,11 +514,16 @@ func successfulJSONResponse(w http.ResponseWriter, responseBytes []byte) {
 }
 
 func jsonResponse(w http.ResponseWriter, statusCode int, responseBytes []byte) {
-	response(w, statusCode, responseBytes, "application/json; charset=utf-8")
+	response(w, statusCode, responseBytes, map[string]string{"Content-Type": "application/json; charset=utf-8"})
 }
 
-func response(w http.ResponseWriter, statusCode int, responseBytes []byte, contentType string) {
-	w.Header().Set("Content-Type", contentType)
+func response(w http.ResponseWriter, statusCode int, responseBytes []byte, headers map[string]string) {
+	if len(headers) > 0 {
+		for k, v := range headers {
+			w.Header().Add(k, v)
+		}
+	}
+	w.Header().Set("Content-Length", strconv.Itoa(len(responseBytes)))
 	w.WriteHeader(statusCode)
 	w.Write(responseBytes)
 }
