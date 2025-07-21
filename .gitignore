@@ -5,3 +5,4 @@ build/
 go.sum
 env.list
 run.sh
+.env
