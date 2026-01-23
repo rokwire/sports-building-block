@@ -4,9 +4,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+## [2.2.0] - 2025-07-22
+### Changed
+- Replace auth library with Building Block SDK [#31](https://github.com/rokwire/sports-building-block/issues/31)
+
+## [2.1.6] - 2025-07-16
+### Changed
+- Pass all headers in the proxy response plus Content-Length [#27](https://github.com/rokwire/sports-building-block/issues/27)
+
+## [2.1.5] - 2025-07-16
+### Removed
+- Debug logs [#27](https://github.com/rokwire/sports-building-block/issues/27)
+### Fixed
+- Pass correct content-type in the http response [#27](https://github.com/rokwire/sports-building-block/issues/27)
+
+## [2.1.4] - 2025-07-16
+### Fixed
+- Lint warnings [#27](https://github.com/rokwire/sports-building-block/issues/27)
+
+## [2.1.3] - 2025-07-16
+### Added
+- Debug logs [#27](https://github.com/rokwire/sports-building-block/issues/27)
+
+## [2.1.2] - 2025-07-14
+### Changed
+- Makefile and Dockerfile
+
+## [2.1.1] - 2025-07-14
+### Added
+- Proxy API for loading images [#27](https://github.com/rokwire/sports-building-block/issues/27)
+
+## [2.1.0] - 2025-06-16
+### Changed
+- Support Google Trust Services as CA [#24](https://github.com/rokwire/sports-building-block/issues/24)
+
+## [2.0.6] - 2023-08-17
+### Fixed
+- Source code formatting
+
+## [2.0.5] - 2023-08-17
+### Added
+- Exposed "name" field in Game json response [#22](https://github.com/rokwire/sports-building-block/issues/22)
+
+## [2.0.4] - 2023-08-17
+### Added
+- Exposed games and sports APIs for other BBs [#20](https://github.com/rokwire/sports-building-block/issues/20)
+
+## [2.0.3] - 2023-04-28
+### Fixed
+- Url for retrieving team schedule [#15](https://github.com/rokwire/sports-building-block/issues/15)
+
 ## [2.0.2] - 2022-11-17
 ### Added
-Set appID and orgID for notifications [#8](https://github.com/rokwire/sports-building-block/issues/8)
+- Set appID and orgID for notifications [#8](https://github.com/rokwire/sports-building-block/issues/8)
 
 ## [2.0.1] - 2022-07-15
 ### Added

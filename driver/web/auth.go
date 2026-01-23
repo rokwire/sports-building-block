@@ -20,9 +20,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/rokwire/core-auth-library-go/v2/authorization"
-	"github.com/rokwire/core-auth-library-go/v2/authservice"
-	"github.com/rokwire/core-auth-library-go/v2/tokenauth"
+	rokwireAuth "github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth"
+	"github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth/authorization"
+	"github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth/tokenauth"
 )
 
 type auth struct {
@@ -33,19 +33,19 @@ type auth struct {
 func newAuth(host string, coreURL string) *auth {
 	sportsServiceURL := fmt.Sprintf("%s/sports-service", host)
 
-	authService := authservice.AuthService{
+	authService := rokwireAuth.Service{
 		ServiceID:   "sports-service",
 		ServiceHost: sportsServiceURL,
 		FirstParty:  true,
 		AuthBaseURL: coreURL,
 	}
 
-	serviceRegLoader, err := authservice.NewRemoteServiceRegLoader(&authService, nil)
+	serviceRegLoader, err := rokwireAuth.NewRemoteServiceRegLoader(&authService, nil)
 	if err != nil {
 		log.Printf("auth -> newAuth: FAILED to init service reg loader: %s", err.Error())
 	}
 
-	serviceRegManager, err := authservice.NewServiceRegManager(&authService, serviceRegLoader)
+	serviceRegManager, err := rokwireAuth.NewServiceRegManager(&authService, serviceRegLoader, false)
 	if err != nil {
 		log.Printf("auth -> newAuth: FAILED to init service reg manager: %s", err.Error())
 	}
@@ -60,12 +60,12 @@ func newAuth(host string, coreURL string) *auth {
 	return &auth
 }
 
-func (a auth) coreAuthCheck(w http.ResponseWriter, r *http.Request) error {
+func (a auth) coreAuthCheck(r *http.Request) error {
 	if a.tokenAuth == nil {
 		log.Printf("auth -> coreAuthCheck: tokenAuth is nil")
 		return fmt.Errorf("auth Service is not initialized")
 	}
-	_, err := a.tokenAuth.CheckRequestTokens(r)
+	_, err := a.tokenAuth.CheckRequestToken(r)
 	if err != nil {
 		log.Printf("auth -> coreAuthCheck: FAILED to validate token: %s", err.Error())
 		return err
@@ -74,12 +74,12 @@ func (a auth) coreAuthCheck(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func (a auth) corePermissionAuthCheck(w http.ResponseWriter, r *http.Request) error {
+func (a auth) corePermissionAuthCheck(r *http.Request) error {
 	if a.tokenAuth == nil {
 		log.Printf("auth -> corePermissionAuthCheck: tokenAuth is nil")
 		return fmt.Errorf("auth Service is not initialized")
 	}
-	claims, err := a.tokenAuth.CheckRequestTokens(r)
+	claims, err := a.tokenAuth.CheckRequestToken(r)
 	if err != nil {
 		log.Printf("auth -> corePermissionAuthCheck: FAILED to validate token: %s", err.Error())
 		return err
@@ -89,6 +89,30 @@ func (a auth) corePermissionAuthCheck(w http.ResponseWriter, r *http.Request) er
 	if err != nil {
 		log.Printf("auth -> corePermissionAuthCheck: invalid permissions: %s", err)
 		return errors.New("invalid permissions")
+	}
+
+	return nil
+}
+
+func (a auth) coreBbAuthCheck(r *http.Request) error {
+	if a.tokenAuth == nil {
+		log.Printf("auth -> coreBbAuthCheck: tokenAuth is nil")
+		return fmt.Errorf("auth Service is not initialized")
+	}
+	claims, err := a.tokenAuth.CheckRequestToken(r)
+	if err != nil {
+		log.Printf("auth -> coreBbAuthCheck: FAILED to validate token: %s", err.Error())
+		return err
+	}
+
+	if !claims.Service {
+		log.Print("auth -> coreBbAuthCheck: claims is not a service")
+		return fmt.Errorf("request claims is not a service")
+	}
+
+	if !claims.FirstParty {
+		log.Print("auth -> coreBbAuthCheck: claims is not first party")
+		return fmt.Errorf("request claims is not first party")
 	}
 
 	return nil

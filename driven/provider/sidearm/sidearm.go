@@ -33,25 +33,28 @@ import (
 )
 
 const host string = "https://fightingillini.com"
+const illinoisTeamName string = "Illinois"
 
 // Provider implements Provider interface
 type Provider struct {
-	mu            sync.Mutex
-	stats         livestats.LiveStats
-	config        source.Config
-	notifications notifications.Notifications
-	nextGame      sidearmModel.LiveGameItem
-	startedGames  []*sidearmModel.LiveGameItem
-	cachedGames   []sidearmModel.Game
-	cachedNews    []model.News
+	mu             sync.Mutex
+	stats          livestats.LiveStats
+	config         source.Config
+	notifications  notifications.Notifications
+	nextGame       sidearmModel.LiveGameItem
+	startedGames   []*sidearmModel.LiveGameItem
+	cachedGames    []sidearmModel.Game
+	cachedNews     []model.News
+	imageURLPrefix string
 }
 
 // NewProvider creates new provider instance
-func NewProvider(internalAPIKey string, host string, ftpHost string, ftpUser string, ftpPassword string, appID string, orgID string) *Provider {
+func NewProvider(internalAPIKey string, proxyAPISubRouter string, host string, ftpHost string, ftpUser string, ftpPassword string, appID string, orgID string) *Provider {
+	imageURLPrefix := host + proxyAPISubRouter + "?proxy_url=" //append query param
 	config := source.NewConfig()
 	notifications := notifications.New(internalAPIKey, host, appID, orgID)
-	stats := livestats.New(notifications, config, ftpHost, ftpUser, ftpPassword)
-	return &Provider{stats: stats, config: config, notifications: notifications}
+	stats := livestats.New(notifications, config, ftpHost, ftpUser, ftpPassword, illinoisTeamName)
+	return &Provider{stats: stats, config: config, notifications: notifications, imageURLPrefix: imageURLPrefix}
 }
 
 // Start Provider
@@ -92,10 +95,10 @@ func (p *Provider) GetCoaches(sport string) ([]model.Coach, error) {
 	}
 	var coaches []model.Coach
 	rosters := r.Rosters
-	if (rosters != nil) && (len(rosters) > 0) {
+	if len(rosters) > 0 {
 		for i := 0; i < len(rosters); i++ {
 			r := rosters[i]
-			photos := buildRosterPhotos(r.Photos)
+			photos := p.buildRosterPhotos(r.Photos)
 			coaches = append(coaches, model.Coach{ID: strconv.Itoa(r.StaffID), Name: r.Name, FirstName: r.FirstName, LastName: r.LastName, Email: r.StaffInfo.Email, Phone: r.StaffInfo.Phone, Title: r.StaffInfo.Title, Bio: r.Bio, Photos: photos})
 		}
 	}
@@ -128,10 +131,10 @@ func (p *Provider) GetPlayers(sport string) ([]model.Player, error) {
 	}
 	var players []model.Player
 	rosters := r.Rosters
-	if (rosters != nil) && (len(rosters) > 0) {
+	if len(rosters) > 0 {
 		for i := 0; i < len(rosters); i++ {
 			r := rosters[i]
-			photos := buildRosterPhotos(r.Photos)
+			photos := p.buildRosterPhotos(r.Photos)
 			var captain bool
 			if r.PlayerInfo.Captain == "True" {
 				captain = true
@@ -169,7 +172,7 @@ func (p *Provider) GetSocialNetworks() ([]model.SportSocial, error) {
 
 	var socNetList []model.SportSocial
 	srcSocNet := s.SportsSocial
-	if (srcSocNet != nil) && (len(srcSocNet) > 0) {
+	if len(srcSocNet) > 0 {
 		for i := 0; i < len(srcSocNet); i++ {
 			r := srcSocNet[i]
 			socNet := model.SportSocial{SportShortName: r.ShortName, TwitterName: r.TwitterName, InstagramName: r.InstagramName, FacebookPage: r.FacebookPage}
@@ -225,7 +228,7 @@ func (p *Provider) GetGames(sports []string, id *string, startDate *string, endD
 		return nil, es
 	}
 
-	games := buildGames(s)
+	games := p.buildGames(s)
 	return games, nil
 }
 
@@ -245,7 +248,7 @@ func (p *Provider) GetTeamSchedule(sport string, year *int) (*model.Schedule, er
 		return nil, err
 	}
 
-	games := buildGames(*sch)
+	games := p.buildGames(*sch)
 	return &model.Schedule{Label: s.ScheduleYear, Games: games}, nil
 }
 
@@ -297,7 +300,7 @@ func (p *Provider) UpdateConfig(cfgBytes []byte) error {
 	if cfgBytes == nil {
 		msg := "new config value must not be nil"
 		log.Printf("sidearm -> UpdateConfig: failed to update config. Reason: %s", msg)
-		return fmt.Errorf(msg)
+		return fmt.Errorf("%s", msg)
 	}
 
 	var cfg source.Config
@@ -365,10 +368,9 @@ func getSchedule(s sidearmModel.Season) (*sidearmModel.Schedule, error) {
 		return nil, fmt.Errorf("sidearm -> getSchedule: there is no schedule url for season [%s]", s.Year)
 	}
 
-	scheduleURL += "&format=json"
 	scheduleBodyBytes, err := request(http.MethodGet, scheduleURL, nil)
 	if err != nil {
-		errMsg := fmt.Sprintf("sidearm -> getSchedule: Failed to load team schedule. Reason: %s", err.Error())
+		errMsg := fmt.Sprintf("sidearm -> getSchedule: failed to load team schedule. Reason: %s", err.Error())
 		log.Print(errMsg)
 		return nil, err
 	}
@@ -376,16 +378,16 @@ func getSchedule(s sidearmModel.Season) (*sidearmModel.Schedule, error) {
 	var sch sidearmModel.Schedule
 	err = json.Unmarshal(scheduleBodyBytes, &sch)
 	if err != nil {
-		log.Printf("sidearm -> getSchedule: Failed to unmarshal schedule response json. Reason: %s", err.Error())
+		log.Printf("sidearm -> getSchedule: failed to unmarshal schedule response json. Reason: %s", err.Error())
 		return nil, err
 	}
 	return &sch, nil
 }
 
-func buildGames(s sidearmModel.Schedule) []model.Game {
+func (p *Provider) buildGames(s sidearmModel.Schedule) []model.Game {
 	var games []model.Game
 	saGames := s.Games
-	if (saGames != nil) && (len(saGames) > 0) {
+	if len(saGames) > 0 {
 		for i := 0; i < len(saGames); i++ {
 			s := saGames[i]
 			var sport model.Sport
@@ -403,14 +405,16 @@ func buildGames(s sidearmModel.Schedule) []model.Game {
 				links = model.Links{Livestats: s.Links.Livestats, Video: s.Links.Video, Audio: s.Links.Audio, Tickets: s.Links.Tickets}
 				var preGame model.GameInfo
 				if s.Links.PreGame != nil {
-					preGame = model.GameInfo{ID: s.Links.PreGame.ID, URL: s.Links.PreGame.URL, StoryImageURL: s.Links.PreGame.StoryImageURL, Text: s.Links.PreGame.Text}
+					gameStoryImageURL := fmt.Sprintf("%s%s", p.imageURLPrefix, s.Links.PreGame.StoryImageURL)
+					preGame = model.GameInfo{ID: s.Links.PreGame.ID, URL: s.Links.PreGame.URL, StoryImageURL: gameStoryImageURL, Text: s.Links.PreGame.Text}
 					links.PreGame = &preGame
 				}
 			}
 
 			var opponent model.Opponent
 			if s.Opponent != nil {
-				opponent = model.Opponent{Name: s.Opponent.Name, LogoImage: s.Opponent.LogoImage}
+				opponentLogoImageURL := fmt.Sprintf("%s%s", p.imageURLPrefix, s.Opponent.LogoImage)
+				opponent = model.Opponent{Name: s.Opponent.Name, LogoImage: opponentLogoImageURL}
 			}
 
 			var results []model.Result
@@ -421,7 +425,8 @@ func buildGames(s sidearmModel.Schedule) []model.Game {
 				}
 			}
 			parkingURL := getParkingURL(s.DisplayField2)
-			games = append(games, model.Game{ID: s.ID, Date: s.Date, DateTimeUtc: s.DateTimeUtc, EndDateTimeUtc: s.EndDateTimeUtc, EndDate: s.EndDateTime, Time: s.Time, AllDay: s.DateInfo.AllDay, Status: s.Status, Description: s.PromotionName, Sport: &sport, Location: &location, ParkingURL: parkingURL, Links: &links, Opponent: &opponent, Results: &results})
+			name := getName(s)
+			games = append(games, model.Game{ID: s.ID, Name: name, Date: s.Date, DateTimeUtc: s.DateTimeUtc, EndDateTimeUtc: s.EndDateTimeUtc, EndDate: s.EndDateTime, Time: s.Time, AllDay: s.DateInfo.AllDay, Status: s.Status, Description: s.PromotionName, Sport: &sport, Location: &location, ParkingURL: parkingURL, Links: &links, Opponent: &opponent, Results: &results})
 		}
 	}
 	return games
@@ -469,8 +474,8 @@ func getChicagoTime() string {
 	return time
 }
 
-func buildRosterPhotos(srcPhotos []sidearmModel.Photo) *model.Photos {
-	if (srcPhotos == nil) || len(srcPhotos) <= 0 {
+func (p *Provider) buildRosterPhotos(srcPhotos []sidearmModel.Photo) *model.Photos {
+	if len(srcPhotos) <= 0 {
 		return nil
 	}
 	var srcPhoto *sidearmModel.Photo
@@ -488,9 +493,9 @@ func buildRosterPhotos(srcPhotos []sidearmModel.Photo) *model.Photos {
 	var fsURL string
 	var thURL string
 	if srcPhoto.Fullsize != "" {
-		fsURL = srcPhoto.Fullsize
+		fsURL = fmt.Sprintf("%s%s", p.imageURLPrefix, srcPhoto.Fullsize)
 	} else {
-		thURL = srcPhoto.Roster
+		thURL = fmt.Sprintf("%s%s", p.imageURLPrefix, srcPhoto.Roster)
 	}
 	var photos model.Photos
 	// Prepare photos with specific url for the client - either use fullsize and resized or use roster photo
@@ -503,7 +508,7 @@ func buildRosterPhotos(srcPhotos []sidearmModel.Photo) *model.Photos {
 }
 
 func request(method, url string, body io.Reader) (responseBytes []byte, err error) {
-	req, err := http.NewRequest(http.MethodGet, url, body)
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
 	}
@@ -528,7 +533,7 @@ func request(method, url string, body io.Reader) (responseBytes []byte, err erro
 	code := resp.StatusCode
 	if !((200 <= code) && (code <= 206)) {
 		errMsg := string(bodyBytes)
-		return nil, fmt.Errorf(errMsg)
+		return nil, fmt.Errorf("%s", errMsg)
 	}
 
 	return bodyBytes, nil
@@ -682,10 +687,7 @@ func (p *Provider) isPreGame() bool {
 	nextInMilliSeconds := next.UnixNano() / int64(time.Millisecond)
 	preGameStartInMilliSeconds := nextInMilliSeconds - int64(5*60*1000) // - 5 minutes
 
-	if nowInMilliSeconds >= preGameStartInMilliSeconds {
-		return true
-	}
-	return false
+	return nowInMilliSeconds >= preGameStartInMilliSeconds
 }
 
 func (p *Provider) loadNews(id *string, sports []string, limit int) ([]model.News, error) {
@@ -733,10 +735,7 @@ func (p *Provider) loadNews(id *string, sports []string, limit int) ([]model.New
 			s := stories[i]
 			var e = &s.Enclosure
 			var sport = &s.Sport
-			var imageURL string
-			if e != nil {
-				imageURL = e.URL
-			}
+			imageURL := fmt.Sprintf("%s%s", p.imageURLPrefix, e.URL)
 			news = append(news, model.News{ID: s.ID, Title: s.Title, Sport: sport.PrimaryGlobalShortName, Link: s.Link, Category: s.Category, Description: s.Description, FullText: s.FullText, FullTextRaw: s.FullTextRaw, ImageURL: imageURL, PubDateUtc: s.PubDateUtc})
 		}
 	}
@@ -844,7 +843,7 @@ func getHome(scheduleItem sidearmModel.Game) bool {
 	var result bool
 	if scheduleItem.Location != nil {
 		han := scheduleItem.Location.HAN
-		result = "H" == han
+		result = han == "H"
 	}
 	return result
 }
@@ -863,4 +862,18 @@ func getLivestats(scheduleItem sidearmModel.Game) string {
 		result = scheduleItem.Links.Livestats
 	}
 	return result
+}
+
+func getName(game sidearmModel.Game) string {
+	var name string
+	var opponentName = getOpponentName(game)
+	if getHome(game) {
+		name = opponentName + " at " + illinoisTeamName
+	} else {
+		name = illinoisTeamName + " at " + opponentName
+	}
+	if game.Status == "C" {
+		name = name + " (Cancelled)"
+	}
+	return name
 }

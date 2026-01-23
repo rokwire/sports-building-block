@@ -17,7 +17,7 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"regexp"
@@ -33,7 +33,7 @@ type ApisHandler struct {
 // GetVersion retrieves application version
 func (a *ApisHandler) GetVersion(w http.ResponseWriter, r *http.Request) {
 	version := a.app.GetVersion()
-	successfulResponse(w, []byte(version))
+	successfulJSONResponse(w, []byte(version))
 }
 
 // GetSports retrieves sport definitions
@@ -44,7 +44,7 @@ func (a *ApisHandler) GetSports(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulResponse(w, []byte(sportDefinitions))
+	successfulJSONResponse(w, []byte(sportDefinitions))
 }
 
 // GetNews retrieves sport news
@@ -73,7 +73,7 @@ func (a *ApisHandler) GetNews(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(news) == 0 {
-		successfulResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -85,7 +85,7 @@ func (a *ApisHandler) GetNews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulResponse(w, []byte(newsJSON))
+	successfulJSONResponse(w, []byte(newsJSON))
 }
 
 // GetCoaches retrieves coaches for a team/sport
@@ -105,7 +105,7 @@ func (a *ApisHandler) GetCoaches(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(coaches) == 0 {
-		successfulResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -117,7 +117,7 @@ func (a *ApisHandler) GetCoaches(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulResponse(w, []byte(coachesJSON))
+	successfulJSONResponse(w, []byte(coachesJSON))
 }
 
 // GetPlayers retrieves players for a team/sport
@@ -137,7 +137,7 @@ func (a *ApisHandler) GetPlayers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(players) == 0 {
-		successfulResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -149,7 +149,7 @@ func (a *ApisHandler) GetPlayers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulResponse(w, []byte(playersJSON))
+	successfulJSONResponse(w, []byte(playersJSON))
 }
 
 // GetSocialNetworks retrieves social networks
@@ -163,7 +163,7 @@ func (a *ApisHandler) GetSocialNetworks(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if len(socNets) == 0 {
-		successfulResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -175,7 +175,7 @@ func (a *ApisHandler) GetSocialNetworks(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	successfulResponse(w, []byte(socNetsJSON))
+	successfulJSONResponse(w, []byte(socNetsJSON))
 }
 
 // GetGames retrieves games
@@ -218,7 +218,7 @@ func (a *ApisHandler) GetGames(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(games) == 0 {
-		successfulResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -230,7 +230,7 @@ func (a *ApisHandler) GetGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulResponse(w, []byte(gamesJSON))
+	successfulJSONResponse(w, []byte(gamesJSON))
 }
 
 // GetTeamSchedule retrieves schedule for a team/sport
@@ -263,7 +263,7 @@ func (a *ApisHandler) GetTeamSchedule(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulResponse(w, []byte(scheduleJSON))
+	successfulJSONResponse(w, []byte(scheduleJSON))
 }
 
 // GetTeamRecord retrieves schedule for a team/sport
@@ -296,7 +296,7 @@ func (a *ApisHandler) GetTeamRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulResponse(w, []byte(recordJSON))
+	successfulJSONResponse(w, []byte(recordJSON))
 }
 
 // GetLiveGames retrieves current live games
@@ -310,7 +310,7 @@ func (a *ApisHandler) GetLiveGames(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(liveGames) == 0 {
-		successfulResponse(w, []byte("[]"))
+		successfulJSONResponse(w, []byte("[]"))
 		return
 	}
 
@@ -328,10 +328,10 @@ func (a *ApisHandler) GetLiveGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulResponse(w, []byte(result))
+	successfulJSONResponse(w, []byte(result))
 }
 
-//GetConfig retrieves the configs
+// GetConfig retrieves the configs
 func (a *ApisHandler) GetConfig(w http.ResponseWriter, r *http.Request) {
 	config, err := a.app.GetConfig()
 	if err != nil {
@@ -349,12 +349,12 @@ func (a *ApisHandler) GetConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulResponse(w, []byte(result))
+	successfulJSONResponse(w, []byte(result))
 }
 
-//UpdateConfig updates the configs
+// UpdateConfig updates the configs
 func (a *ApisHandler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
-	cfgBytes, err := ioutil.ReadAll(r.Body)
+	cfgBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		errMsg := "failed to read request body"
 		log.Printf("apis -> updateConfig: failed, reason: %s", err.Error())
@@ -370,7 +370,54 @@ func (a *ApisHandler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	successfulResponse(w, []byte("Successfully updated"))
+	successfulJSONResponse(w, []byte("Successfully updated"))
+}
+
+// Proxy handles proxy request - currently GET methods for images
+func (a *ApisHandler) Proxy(w http.ResponseWriter, r *http.Request) {
+	proxyUrls := r.URL.Query()["proxy_url"]
+	urlsCount := len(proxyUrls)
+	if urlsCount != 1 {
+		errMsg := fmt.Sprintf("apis -> Proxy: 'proxy_url' query parameter's number must be 1 - current is [%d]", urlsCount)
+		jsonResponse(w, http.StatusBadRequest, []byte(errMsg))
+		return
+	}
+
+	proxyURL := &proxyUrls[0]
+
+	req, err := http.NewRequest(http.MethodGet, *proxyURL, r.Body)
+	if err != nil {
+		log.Printf("apis -> Proxy: request failed: %s", err.Error())
+		jsonResponse(w, http.StatusInternalServerError, []byte(err.Error()))
+		return
+	}
+
+	client := &http.Client{Transport: &http.Transport{}}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		log.Printf("apis -> Proxy: response failed: %s", err.Error())
+		jsonResponse(w, http.StatusInternalServerError, []byte(err.Error()))
+		return
+	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	resp.Body.Close()
+
+	if err != nil {
+		log.Printf("apis -> Proxy: reading body failed: %s", err.Error())
+		jsonResponse(w, http.StatusInternalServerError, []byte(err.Error()))
+		return
+	}
+
+	headerMap := make(map[string]string)
+	for key, value := range resp.Header {
+		if len(value) > 0 {
+			headerMap[key] = value[0]
+		}
+	}
+
+	response(w, resp.StatusCode, bodyBytes, headerMap)
 }
 
 func parseID(r *http.Request) (*string, error) {
@@ -425,7 +472,7 @@ func parseSport(r *http.Request) (*string, error) {
 	if (sports == nil) || (len(sports) != 1) {
 		errMsg := "please provide exactly one 'sport' query parameter"
 		log.Println(errMsg)
-		return nil, fmt.Errorf(errMsg)
+		return nil, fmt.Errorf("%s", errMsg)
 	}
 	return &sports[0], nil
 }
@@ -438,13 +485,13 @@ func parseYear(r *http.Request) (*int, error) {
 		if err != nil {
 			errMsg := fmt.Sprintf("Invalid 'year' value [%s]. Please provide valid year number.", year[0])
 			log.Printf("sidearm -> GetTeamSchedule: failed to parse year to int. Error: %s", err.Error())
-			return nil, fmt.Errorf(errMsg)
+			return nil, fmt.Errorf("%s", errMsg)
 		}
 		y = &val
 	} else if len(year) > 1 {
 		errMsg := "please provide zero or one 'year' query parameter"
 		log.Println(errMsg)
-		return nil, fmt.Errorf(errMsg)
+		return nil, fmt.Errorf("%s", errMsg)
 	}
 	return y, nil
 }
@@ -462,9 +509,22 @@ func validateDate(date *string) error {
 	return fmt.Errorf("provide valid date in format 'MM/dd/yyyy'")
 }
 
-func successfulResponse(w http.ResponseWriter, responseBytes []byte) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
+func successfulJSONResponse(w http.ResponseWriter, responseBytes []byte) {
+	jsonResponse(w, http.StatusOK, responseBytes)
+}
+
+func jsonResponse(w http.ResponseWriter, statusCode int, responseBytes []byte) {
+	response(w, statusCode, responseBytes, map[string]string{"Content-Type": "application/json; charset=utf-8"})
+}
+
+func response(w http.ResponseWriter, statusCode int, responseBytes []byte, headers map[string]string) {
+	if len(headers) > 0 {
+		for k, v := range headers {
+			w.Header().Add(k, v)
+		}
+	}
+	w.Header().Set("Content-Length", strconv.Itoa(len(responseBytes)))
+	w.WriteHeader(statusCode)
 	w.Write(responseBytes)
 }
 

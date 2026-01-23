@@ -119,7 +119,7 @@ func NewConfig() Config {
 	return config
 }
 
-//GetLivestatsSource gives the livestats source
+// GetLivestatsSource gives the livestats source
 func (config *Config) GetLivestatsSource(sport string, home bool) []string {
 	sportConfig := config.LivestatsSource[sport]
 	loc := "away"
@@ -130,33 +130,33 @@ func (config *Config) GetLivestatsSource(sport string, home bool) []string {
 	return sources
 }
 
-//GetFootballDateCheck gives the xml feed date check flag
+// GetFootballDateCheck gives the xml feed date check flag
 func (config *Config) GetFootballDateCheck() bool {
 	return config.FootballConfig.XMLDateCheck
 }
 
-//GetFootballPhaseLabel gives the football phase label
+// GetFootballPhaseLabel gives the football phase label
 func (config *Config) GetFootballPhaseLabel(phase string) string {
 	footbalConfig := config.FootballConfig
 	phases := footbalConfig.Phases
 	return phases[phase]
 }
 
-//GetMBasketballPhaseLabel gives the men's basketball phase label
+// GetMBasketballPhaseLabel gives the men's basketball phase label
 func (config *Config) GetMBasketballPhaseLabel(phase string) string {
 	mbballConfig := config.MBasketballConfig
 	phases := mbballConfig.Phases
 	return phases[phase]
 }
 
-//GetWBasketballPhaseLabel gives the women's basketball phase label
+// GetWBasketballPhaseLabel gives the women's basketball phase label
 func (config *Config) GetWBasketballPhaseLabel(phase string) string {
 	wbballConfig := config.WBasketballConfig
 	phases := wbballConfig.Phases
 	return phases[phase]
 }
 
-//GetBasketballDateCheck gives the basketball date check flag
+// GetBasketballDateCheck gives the basketball date check flag
 func (config *Config) GetBasketballDateCheck(sport string) bool {
 	switch sport {
 	case "mbball":
@@ -168,7 +168,7 @@ func (config *Config) GetBasketballDateCheck(sport string) bool {
 	}
 }
 
-//GetBasketballLastPlay gives the basketball last play flag
+// GetBasketballLastPlay gives the basketball last play flag
 func (config *Config) GetBasketballLastPlay(sport string) bool {
 	switch sport {
 	case "mbball":
@@ -180,12 +180,12 @@ func (config *Config) GetBasketballLastPlay(sport string) bool {
 	}
 }
 
-//GetVolleyballDateCheck gives the volleyball date check flag
+// GetVolleyballDateCheck gives the volleyball date check flag
 func (config *Config) GetVolleyballDateCheck() bool {
 	return config.VolleyballConfig.XMLDateCheck
 }
 
-//GetVolleyballPhaseLabel gives the volleyball phase label
+// GetVolleyballPhaseLabel gives the volleyball phase label
 func (config *Config) GetVolleyballPhaseLabel(phase string) string {
 	wvballConfig := config.VolleyballConfig
 	phases := wvballConfig.Phases

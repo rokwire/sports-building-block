@@ -9,7 +9,7 @@ The functionality provided by this application is documented in the [Wiki](https
 
 ### Prerequisites
 
-Go v1.16+
+Go v1.24+
 
 ### Environment variables
 
