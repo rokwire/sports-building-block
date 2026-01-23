@@ -186,7 +186,7 @@ func (xmlVolleyballSource *xmlVolleyballSource) constructCustomData(xmlData *xml
 	var data []byte
 	data, err := json.Marshal(volleyballCustomData)
 	if err != nil {
-		log.Printf("xmlvolleyball constructCustomData() -> %s\n" + err.Error())
+		log.Printf("%s", "xmlvolleyball constructCustomData() -> %s\n"+err.Error())
 		return ""
 	}
 	value := string(data)
