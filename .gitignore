@@ -2,7 +2,6 @@ vendor/
 bin/
 build/
 .vscode/
-go.sum
 env.list
 run.sh
 .env
