@@ -402,7 +402,8 @@ func (p *Provider) buildGames(s sidearmModel.Schedule) []model.Game {
 
 			var links model.Links
 			if s.Links != nil {
-				links = model.Links{Livestats: s.Links.Livestats, Video: s.Links.Video, Audio: s.Links.Audio, Tickets: s.Links.Tickets}
+				tickets := addTicketsUTMParams(sport.ShortName, s.Links.Tickets)
+				links = model.Links{Livestats: s.Links.Livestats, Video: s.Links.Video, Audio: s.Links.Audio, Tickets: tickets}
 				var preGame model.GameInfo
 				if s.Links.PreGame != nil {
 					gameStoryImageURL := fmt.Sprintf("%s%s", p.imageURLPrefix, s.Links.PreGame.StoryImageURL)
